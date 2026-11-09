@@ -1,0 +1,1285 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ITK-BGSV Prompt Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 3D office. HUD panels are hairline-ruled drawing-sheet title blocks pinned to the corners. Missions open as a two-column sheet: brief on the left, editor and review on the right. */
+:root{
+  --paper:#eef1f3; --paper-2:#e2e8ec; --ink:#13202c; --muted:#546574; --rule:#b4c0ca;
+  --blue:#0b4796; --amber:#e3a008; --ok:#1f7a45; --bad:#b92d1b;
+  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;overflow:hidden;background:var(--paper);color:var(--ink);font:14px/1.5 var(--f-body)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.mono{font-family:var(--f-mono)}
+#app{position:relative;width:100%;height:100%;overflow:hidden;background:#cfd8df;user-select:none;-webkit-user-select:none}
+#view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+
+.panel{background:rgba(238,241,243,.95);border:1px solid var(--ink)}
+.k{font:500 10px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* HUD */
+#hud{position:absolute;inset:0;pointer-events:none;z-index:5}
+#hud>*{pointer-events:auto}
+.idcard{position:absolute;top:12px;left:max(16px,env(safe-area-inset-left,0px));width:min(232px,46vw);display:grid}
+.idcard .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--rule)}
+.idcard .row:last-child{border-bottom:0}
+.idcard .v{font:700 18px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase;text-align:right;min-width:0}
+.idcard .sw{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:0}
+.xp{padding:8px 10px;border-bottom:1px solid var(--rule)}
+.bar{height:8px;background:var(--paper-2);border:1px solid var(--ink)}
+.bar i{display:block;height:100%;width:0;background:var(--amber);transition:width .4s}
+.xp .small{display:flex;justify-content:space-between;margin-top:5px;font:400 10px/1 var(--f-mono);color:var(--muted)}
+.mapwrap{position:absolute;top:12px;right:max(16px,env(safe-area-inset-right,0px));padding:6px 6px 4px}
+.mapwrap canvas{display:block;width:min(192px,40vw);height:auto;aspect-ratio:4/3;background:#dfe6eb}
+.mapwrap .k{display:block;margin-top:5px}
+.hint{position:absolute;left:50%;bottom:112px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;max-width:calc(100% - 32px);text-align:left}
+.hint .cap{font:500 12px/1 var(--f-mono);border:1px solid var(--ink);background:#fff;padding:4px 7px;box-shadow:0 2px 0 var(--ink)}
+.hint b{font:700 17px/1.1 var(--f-display);letter-spacing:.05em;text-transform:uppercase}
+.hint.locked{cursor:default;opacity:.92}
+.hint.locked .cap{background:var(--paper-2);box-shadow:none}
+.help{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:16px;padding:7px 10px;font:400 11px/1.4 var(--f-mono);color:var(--muted)}
+.logbtn{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:16px;padding:9px 14px;cursor:pointer;font:700 15px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
+.logbtn:hover{background:#fff}
+.side{position:absolute;top:224px;left:max(16px,env(safe-area-inset-left,0px));width:min(232px,46vw);display:grid}
+.side .score-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:7px 10px;border-bottom:1px solid var(--rule)}
+.side .score-row b{font:700 18px/1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.side .list-head{padding:7px 10px;border-bottom:1px solid var(--rule)}
+.side ol{list-style:none;margin:0;padding:0;max-height:min(260px,40vh);overflow:auto}
+.side li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--rule)}
+.side li:last-child{border-bottom:0}
+.side li b{font:600 13px/1.3 var(--f-body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side li span{font:500 11px/1.3 var(--f-mono);white-space:nowrap}
+.joy{position:absolute;left:max(20px,env(safe-area-inset-left,0px));bottom:20px;width:124px;height:124px;border:2px solid var(--ink);border-radius:50%;background:rgba(238,241,243,.55);touch-action:none}
+.joy i{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;background:var(--ink);opacity:.82}
+.toast{position:absolute;left:50%;top:92px;transform:translateX(-50%);z-index:30;max-width:calc(100% - 32px);padding:10px 16px;background:var(--ink);color:#fff;font:500 13px/1.35 var(--f-body);text-align:center;pointer-events:none}
+
+/* Overlays */
+.overlay{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));background:rgba(19,32,44,.55);overflow:auto}
+.sheet{width:min(1040px,100%);max-height:100%;overflow:auto;background:var(--paper);border:1px solid var(--ink);display:flex;flex-direction:column;user-select:text;-webkit-user-select:text}
+.sheet-head{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--ink)}
+.sheet-head h2,.start h1{margin:4px 0 0;font:700 34px/1 var(--f-display);letter-spacing:.03em;text-transform:uppercase;text-wrap:balance}
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.chip i{width:10px;height:10px;display:inline-block}
+.titleblock{display:grid;grid-template-columns:repeat(3,auto);border:1px solid var(--ink);flex:none}
+.titleblock div{padding:6px 12px;border-right:1px solid var(--ink);display:grid;gap:4px}
+.titleblock div:last-child{border-right:0}
+.titleblock span{font:500 9px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.titleblock b{font:700 16px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.x{flex:none;width:34px;height:34px;border:1px solid var(--ink);background:transparent;font-size:20px;line-height:1;cursor:pointer}
+.x:hover{background:#fff}
+.sheet-body{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);min-height:0}
+.col-brief{padding:16px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:6px}
+.col-brief p{margin:0 0 8px}
+.col-brief .label{margin:8px 0 2px}
+.col-brief .label:first-child{margin-top:0}
+.col-brief .note{color:var(--muted)}
+dl{margin:0 0 8px;border:1px solid var(--rule);background:#fff}
+dl div{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:10px;padding:6px 10px;border-bottom:1px solid var(--rule)}
+dl div:last-child{border-bottom:0}
+dt{font:500 11px/1.5 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+dd{margin:0;font:500 12px/1.5 var(--f-mono);overflow-wrap:anywhere}
+.col-edit{padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+textarea{width:100%;min-height:250px;resize:vertical;border:1px solid var(--ink);background:#fff;color:var(--ink);padding:12px;font:400 13px/1.55 var(--f-mono);border-radius:0}
+.edit-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.edit-bar .mono{font-size:12px;color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--ink);background:transparent;padding:9px 16px;font:700 16px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:#fff}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#093a78}
+.btn.warn{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.result{border:1px solid var(--ink);background:#fff}
+.score{display:flex;align-items:center;gap:14px;padding:12px;border-bottom:1px solid var(--rule)}
+.score .big{font:700 52px/1 var(--f-display);min-width:96px;text-align:center;border:1px solid var(--ink);padding:6px 8px;font-variant-numeric:tabular-nums}
+.score b{font:700 22px/1.1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.score p{margin:4px 0 0;font:400 12px/1.4 var(--f-mono);color:var(--muted)}
+.checks{list-style:none;margin:0;padding:0}
+.checks li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;padding:8px 12px;border-bottom:1px solid var(--rule)}
+.checks li:last-child{border-bottom:0}
+.checks .tag{font:500 10px/1 var(--f-mono);letter-spacing:.1em;padding:4px 0;text-align:center;border:1px solid;align-self:start}
+.checks .ok .tag{color:var(--ok)}
+.checks .bad .tag{color:var(--bad)}
+.checks b{font-weight:600}
+.checks p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+details{border-top:1px solid var(--ink)}
+summary{padding:10px 12px;cursor:pointer;font:700 15px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
+details pre{margin:0;padding:0 12px 12px;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12px/1.6 var(--f-mono)}
+
+/* Start */
+.start{width:min(900px,100%);max-height:100%;overflow:auto;background:var(--paper);border:1px solid var(--ink)}
+.start-head{padding:18px 20px 16px;border-bottom:1px solid var(--ink)}
+.start h1{font-size:clamp(40px,8vw,68px);margin-top:8px}
+.start-head p{max-width:62ch;margin:12px 0 0;font-size:15px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{display:block;flex:none;width:clamp(60px,14vw,92px);height:auto;aspect-ratio:1;background:#fff;border:1px solid var(--ink)}
+.logo-s{display:block;flex:none;width:26px;height:26px;background:#fff;border:1px solid var(--rule)}
+.idcard .brandrow{justify-content:flex-start;gap:8px;padding:6px 8px}
+.start-main{padding:16px 20px 20px;display:grid;gap:14px}
+.discs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.disc{display:grid;gap:6px;text-align:left;padding:10px 12px;border:1px solid var(--rule);background:#fff;cursor:pointer}
+.disc:hover{border-color:var(--ink)}
+.disc[aria-checked="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:#f7f9fa}
+.disc b{display:flex;align-items:center;gap:8px;font:700 21px/1 var(--f-display);letter-spacing:.05em;text-transform:uppercase}
+.disc b i{width:12px;height:12px;display:inline-block;flex:none}
+.disc span{font-size:12.5px;color:var(--muted)}
+.start-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.keys{font:400 11.5px/1.6 var(--f-mono);color:var(--muted);margin:0;max-width:58ch}
+.name-f{display:grid;gap:6px}
+.name-f input{width:100%;max-width:360px;padding:10px 12px;border:1px solid var(--ink);background:#fff;color:var(--ink);font:500 16px var(--f-body);border-radius:0}
+.nogl{padding:10px 12px;border:1px solid var(--bad);color:var(--bad);font-weight:500}
+
+/* Log */
+.log{width:min(640px,100%);max-height:100%;overflow:auto;background:var(--paper);border:1px solid var(--ink)}
+.log ol{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--rule)}
+.log li b{display:block;font:700 18px/1.1 var(--f-display);letter-spacing:.04em;text-transform:uppercase}
+.log li span{font:400 12px/1.4 var(--f-mono);color:var(--muted)}
+.log li em{font:500 12px/1 var(--f-mono);font-style:normal;white-space:nowrap}
+.log li.done em{color:var(--ok)}
+.log-foot{display:flex;justify-content:space-between;gap:10px;padding:12px 16px;flex-wrap:wrap}
+
+@media (max-width:760px){
+  .sheet-body{grid-template-columns:minmax(0,1fr)}
+  .col-brief{border-right:0;border-bottom:1px solid var(--rule)}
+  .sheet-head{flex-wrap:wrap}
+  .sheet-head h2{font-size:28px}
+  .titleblock{order:3;width:100%}
+  .titleblock div{padding:6px 10px}
+  .titleblock b{font-size:14px}
+  .idcard .row{padding:6px 8px}
+  .idcard .v{font-size:15px}
+  .hint{bottom:156px}
+  .toast{top:120px}
+}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div id="app">
+  <canvas id="view" aria-label="3D engineering office"></canvas>
+
+  <div id="hud" hidden>
+    <div class="idcard panel">
+      <div class="row brandrow"><img data-logo class="logo-s" alt="" width="26" height="26"><span class="k">ITK-BGSV · Engineer ID</span></div>
+      <div class="row"><span class="k">Engineer</span><span class="v"><i class="sw" id="h-sw"></i><span id="h-disc"></span></span></div>
+      <div class="row"><span class="k">Rank</span><span class="v" id="h-rank"></span></div>
+      <div class="xp"><div class="bar"><i id="h-bar"></i></div><div class="small"><span id="h-xp"></span><span id="h-next"></span></div></div>
+      <div class="row"><span class="k">Missions</span><span class="v" id="h-miss"></span></div>
+    </div>
+    <div class="mapwrap panel"><canvas id="map" width="192" height="144"></canvas><span class="k">Floor plan</span></div>
+    <button id="hint" class="hint panel" type="button" hidden><span class="cap">E</span><b id="hint-t"></b></button>
+    <div id="help" class="help panel">WASD move · Shift run · drag to look · ← → turn · E use · M missions</div>
+    <button id="logbtn" class="logbtn panel" type="button">Missions</button>
+    <div id="side" class="side panel">
+      <div class="score-row"><span class="k">Score</span><b id="s-score">0 XP</b></div>
+      <div class="list-head"><span class="k">Users online · <span id="s-count">0</span></span><span id="net-status" class="k" role="status">Connecting</span></div>
+      <ol id="s-list"></ol>
+    </div>
+    <div id="joy" class="joy" hidden><i id="joyknob"></i></div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <div id="start" class="overlay">
+    <div class="start" role="dialog" aria-labelledby="s-title">
+      <div class="start-head">
+        <div class="brand">
+          <img data-logo class="logo" alt="ITK Engineering logo" width="92" height="92">
+          <div><span class="chip"><i style="background:var(--blue)"></i>ITK-BGSV · Engineering office</span>
+          <h1 id="s-title">ITK-BGSV Prompt Works</h1></div>
+        </div>
+        <p>Walk the office, take on real automotive engineering tasks, and practise writing the prompts, skills and agents your team will depend on. Every mission is reviewed against a rubric, and you can compare your answer with a reference.</p>
+      </div>
+      <div class="start-main">
+        <div id="nogl" class="nogl" hidden>This browser cannot start 3D graphics (WebGL), so the office cannot open here. Try a recent Chrome, Edge, Firefox or Safari.</div>
+        <div class="name-f"><label class="k" for="name-in">Your name (shown above your character)</label><input id="name-in" type="text" maxlength="20" autocomplete="off" placeholder="e.g. Marta K."></div>
+        <div><span class="k">Choose your discipline · missions in your field pay 20% more XP</span></div>
+        <div class="discs" id="discs" role="radiogroup" aria-label="Discipline"></div>
+        <div class="start-foot">
+          <p class="keys">Desktop: WASD or arrow keys to walk, Shift to run, drag the view to look around, E at a glowing marker to start a mission. Touch: left stick to walk, drag to look, tap the prompt to open.</p>
+          <span id="service-status" class="k" role="status">Connecting to game service</span>
+          <button id="users-btn" class="btn" type="button">See all users</button>
+          <button id="clockin" class="btn primary" type="button" disabled>Clock in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mission" class="overlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="m-title">
+      <header class="sheet-head">
+        <div><span class="chip" id="m-dept"></span><h2 id="m-title"></h2></div>
+        <div class="titleblock">
+          <div><span>Mission</span><b id="m-num"></b></div>
+          <div><span>Type</span><b id="m-kind"></b></div>
+          <div><span>Reward</span><b id="m-xp"></b></div>
+        </div>
+        <button id="m-lang" class="btn" type="button">Tiếng Việt</button>
+        <button id="m-close" class="x" type="button" aria-label="Close mission">×</button>
+      </header>
+      <div class="sheet-body">
+        <section class="col-brief">
+          <p class="k label" id="m-l-scen">Scenario</p><p id="m-brief"></p>
+          <div id="m-data-wrap"><p class="k label" id="m-l-desk">On the desk</p><dl id="m-data"></dl></div>
+          <p class="k label" id="m-l-task">Your task</p><p id="m-task"></p>
+          <p class="k label" id="m-l-note">Field note</p><p id="m-lesson" class="note"></p>
+        </section>
+        <section class="col-edit">
+          <label class="k" for="m-text" id="m-label">Your answer</label>
+          <textarea id="m-text" spellcheck="false" placeholder="Write here. Be specific: a reviewer, human or AI, should be able to act on it."></textarea>
+          <p id="review-privacy" class="k" role="note">Loading grading policy…</p>
+          <div class="edit-bar">
+            <span id="m-words" class="mono"></span>
+            <div class="btns">
+              <button id="m-starter" class="btn" type="button" hidden>Insert header</button>
+              <button id="m-submit" class="btn primary" type="button">Submit for review</button>
+            </div>
+          </div>
+          <div id="m-result" class="result" hidden>
+            <div class="score"><div class="big" id="r-score"></div><div><b id="r-verdict"></b><p id="r-xp"></p><p id="r-summary"></p></div></div>
+            <ul class="checks" id="r-list"></ul>
+            <details><summary>Compare with a reference answer</summary><pre id="r-ref"></pre></details>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="users" class="overlay" hidden>
+    <div class="log" role="dialog" aria-modal="true" aria-labelledby="u-title">
+      <header class="sheet-head"><div><span class="chip">Office</span><h2 id="u-title" style="font:700 30px/1 var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 0">Users online</h2></div><button id="u-close" class="x" type="button" aria-label="Close user list">×</button></header>
+      <ol id="u-list"></ol>
+    </div>
+  </div>
+
+  <div id="log" class="overlay" hidden>
+    <div class="log" role="dialog" aria-modal="true" aria-labelledby="l-title">
+      <header class="sheet-head"><div><span class="chip">Progress</span><h2 id="l-title" style="font:700 30px/1 var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:4px 0 0">Mission log</h2></div><button id="l-close" class="x" type="button" aria-label="Close mission log">×</button></header>
+      <ol id="l-list"></ol>
+      <div class="log-foot"><span class="mono k" id="l-sum" style="align-self:center"></span><button id="l-delete" class="btn" type="button">Delete guest data</button><button id="l-reset" class="btn" type="button">Reset progress</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/three.min.js"></script>
+<script>
+window.AP=(function(){
+'use strict';
+const rx=(re,n)=>t=>{const m=t.match(new RegExp(re.source,'gi'));return !!m&&m.length>=(n||1);};
+const both=(a,b)=>t=>a(t)&&b(t);
+const R=(label,tip,fn)=>({label,tip,fn});
+
+const ROLE=rx(/\b(you are|act as|acting as|your role is|as an? [a-z\- ]{0,30}(engineer|specialist|analyst|expert|lead))\b/);
+const ROLE_TIP='Start with a role, such as "You are a powertrain test engineer". It sets the words and depth.';
+
+const DISCIPLINES=[
+ {id:'powertrain',name:'Powertrain',color:'#d9622b',blurb:'Engines, e-drives and calibration.'},
+ {id:'battery',name:'Battery & EV',color:'#17a2a2',blurb:'Packs, BMS and charging.'},
+ {id:'chassis',name:'Chassis',color:'#3b6fd4',blurb:'Suspension, steering and brakes.'},
+ {id:'safety',name:'Safety',color:'#c9a100',blurb:'Crash, restraints and regulations.'},
+ {id:'validation',name:'Validation',color:'#7a4fd0',blurb:'Test plans, rigs and track work.'},
+ {id:'quality',name:'Quality',color:'#2f9e5b',blurb:'Defects, 8D and supplier issues.'}
+];
+
+const RANKS=[
+ {min:0,name:'Intern'},
+ {min:150,name:'Junior Engineer'},
+ {min:350,name:'Engineer'},
+ {min:600,name:'Senior Engineer'},
+ {min:900,name:'Principal Engineer'}
+];
+
+const MISSIONS=[
+{
+ id:'onboard',zone:'lobby',dept:null,kind:'Prompt',title:'Fix a vague question',xp:100,minWords:12,
+ brief:'Marta at reception gives you a laptop. New hires often send the team AI assistant a short message like this: "Tell me about brake noise." The answers are long and not useful.',
+ data:null,
+ task:'Rewrite the message as a clear prompt for a brake NVH engineer. Make up realistic details.',
+ lesson:'A good engineering prompt has five parts: Role, Context, Task, Format and Constraints. If one part is missing, the AI guesses.',
+ rubric:[
+  R('Gives the AI a role',ROLE_TIP,ROLE),
+  R('Adds real context (car, conditions, parts)','Name the car, speed, temperature or brake parts so the answer fits.',rx(/\b(vehicle|suv|sedan|model|speed|km\/h|mph|temperature|°c|mileage|pad|rotor|disc|caliper|squeal|groan|judder)\b/,2)),
+  R('States a specific task','Use a clear verb: diagnose, rank, compare, summarise, recommend.',rx(/\b(diagnose|identify|rank|list|summari[sz]e|compare|propose|recommend|explain|analy[sz]e)\b/)),
+  R('Specifies the output format','Say what you want back: a table, five bullets, under 200 words.',rx(/\b(table|bullets?|numbered|json|format|sections?|headings?|columns?|steps?|max(imum)?\s+\d+|no more than \d+|\d+ (words|bullets|items|lines|sentences))\b/)),
+  R('Sets constraints','Add limits: what not to do, what to do when information is missing.',rx(/\b(do not|don't|never|only|must|avoid|at most|limit|no more than|if (you are )?(unsure|unknown|missing)|ask me)\b/)),
+  R('Carries enough context (40+ words)','Write at least 40 words. A short prompt leaves the AI guessing.',(t,w)=>w>=40)
+ ],
+ ref:'You are a brake NVH engineer supporting a vehicle dynamics team. Context: a mid-size SUV (1,850 kg) produces a high-pitched squeal at 20-40 km/h during light braking, mostly below 10 °C after rain.\nTask: rank the five most likely causes and give one quick check for each.\nFormat: a table with columns Cause, Why it fits, Quick check.\nConstraints: do not recommend part replacement before a check. If information is missing, ask me up to three questions first. Keep it under 250 words.'
+},
+{
+ id:'dyno',zone:'powertrain',dept:'powertrain',kind:'Prompt',title:'Dyno run, one page',xp:150,minWords:30,
+ brief:'Ravi ran the 2.0 L turbo petrol engine on the dyno (engine test bench) overnight. The chief engineer reads the report at 08:30. He wants one page, not a spreadsheet.',
+ data:[['Peak torque','342 Nm at 2,100 rpm (target 350)'],['Peak power','188 kW at 5,600 rpm (target 190)'],['Fuel use (BSFC)','238 g/kWh at 2,600 rpm, 60% load (target 230)'],['Knock events','14 at 4,200 rpm, full load'],['Intake air temp','52 °C (cell limit 45 °C)']],
+ task:'Write the prompt that turns this data into the morning summary. Paste the numbers in, or use a placeholder such as {dyno_data}.',
+ lesson:'Tell the AI who reads the summary and what decision they must make. A summary for a chief engineer is different from one for a calibration engineer.',
+ rubric:[
+  R('Gives the AI a role',ROLE_TIP,ROLE),
+  R('Includes or points to the data','Paste the numbers or use a placeholder like {dyno_data} so the AI works from facts.',rx(/(\{[^}]+\}|\[[^\]]+\]|\b342\b|\bbsfc\b|\bknock\b)/)),
+  R('Asks for the gap to target','Ask for each value against its target, with the difference.',rx(/\b(target|gap|delta|deviation|vs\.?|versus|compare|shortfall)\b/)),
+  R('Names the audience or decision','Say who reads it and what they decide: chief engineer, milestone, go or no-go.',rx(/\b(chief|manager|executive|non-technical|audience|reader|stakeholder|lead|decision|milestone)\b/)),
+  R('Fixes units and output format','State units (Nm, kW, g/kWh) and the layout (table, bullets, word limit).',both(rx(/\b(nm|kw|g\/kwh|rpm|units?)\b/),rx(/\b(table|bullets?|one page|1 page|json|sections?|headings?|words)\b/))),
+  R('Stops invented numbers','Tell the AI not to make up or estimate numbers. It should list missing data instead.',rx(/((do not|don't|never)\s+(\w+\s+){0,3}(invent|guess|make up|fabricate|assume|estimate)|only use (the )?(data|numbers|values)|flag (any )?(missing|gaps))/)),
+  R('Asks for next actions','End with what happens next: actions, owners, follow-up tests.',rx(/\b(next steps?|actions?|recommend\w*|follow-up|owner)\b/))
+ ],
+ ref:'You are a powertrain test engineer writing for the chief engineer, who has two minutes. Using only {dyno_data}, write a one-page summary: (1) a table of torque, power, BSFC and knock against target with the gap in Nm, kW and g/kWh; (2) the two issues that most threaten the milestone, ranked; (3) three next actions, each with an owner role.\nDo not invent or estimate any number. If a value is missing, list it under "Data needed". Plain language, under 200 words.'
+},
+{
+ id:'bms',zone:'battery',dept:'battery',kind:'Prompt',title:'One weak cell',xp:150,minWords:30,
+ brief:'After a 150 kW fast charge, the 96-cell battery pack in test car EV-07 shows one weak cell. The battery log is below. Lena needs the likely causes before the pack goes back on the test bench.',
+ data:[['Cell 47 voltage','3.612 V (pack average 3.689 V) at 50% charge'],['Biggest cell difference','77 mV'],['Module 3 temperature range','6 °C across the module'],['Cell 47 resistance','+18% compared with the module average'],['Charge history','11 fast charges since the last cell balancing']],
+ task:'Write the prompt that makes the AI rank the likely causes and suggest checks. It should not jump to one answer.',
+ lesson:'For diagnosis, ask for a ranked list of possible causes, with evidence for and against each. One confident answer hides the other options.',
+ rubric:[
+  R('Sets a battery engineer role','Name the specialty: "You are a senior battery systems engineer".',rx(/\b(you are|act as|acting as)\b[^.]{0,60}\b(battery|bms|cell|electrochem|ev)\b/)),
+  R('Asks for a ranked list of causes','Ask for the top few causes, in order, instead of one answer.',rx(/\b(rank\w*|hypothes\w*|probable|likely causes?|prioriti[sz]e|top \d)\b/)),
+  R('Requires evidence for each cause','Ask what supports and what argues against each cause.',rx(/\b(evidence|supports?|rules? out|because|rationale|justif\w*|reasoning)\b/)),
+  R('Asks for confidence','Ask for low, medium or high confidence per cause.',rx(/\b(confidence|likelihood|probability|certain\w*|low\/medium\/high)\b/)),
+  R('Asks for checks to confirm each cause','Ask for the test or measurement that would confirm each cause.',rx(/\b(test|measure\w*|check|inspect\w*|verify|diagnostic|next step)\b/)),
+  R('Includes a safety rule','Tell the AI what to do if the data shows a heat or high-voltage danger.',rx(/\b(safety|thermal runaway|hazard|isolat\w*|high.?voltage|hv|escalat\w*|stop)\b/)),
+  R('References the log data','Paste the log or point to it, for example {bms_log}.',rx(/(\{[^}]+\}|\[[^\]]+\]|\b47\b|\b77 ?mv\b|\bbms\b)/))
+ ],
+ ref:'You are a senior battery systems engineer. Below is the BMS log for EV-07: {bms_log}. Rank the four most probable causes of the low cell 47 voltage. For each give: evidence from the log that supports it, evidence that argues against it, a confidence (low, medium or high), and one measurement that would confirm it.\nDo not name a single root cause. If any value could indicate a thermal or safety hazard, say so first and recommend stopping the test and escalating to the HV safety lead. Return a table, then a three-line summary.'
+},
+{
+ id:'skill',zone:'chassis',dept:'chassis',kind:'Skill',title:'Package a routine',xp:150,minWords:60,
+ brief:'Every week Priya checks suspension hardpoint sheets by hand. Hardpoints are the points where the suspension joins the car body. She checks toe change, camber gain and roll centre height. Turn her routine into a reusable skill file that the AI loads when needed.',
+ data:[['Front toe change','±0.10° max, for ±50 mm of wheel movement'],['Camber gain','−0.6 to −1.0 °/° of body roll'],['Roll centre height','60-110 mm front, 90-150 mm rear'],['Input file','hardpoints.xlsx, mm, vehicle coordinates']],
+ task:'Write the SKILL.md: the header block the AI uses to decide when to load it, then the working steps.',
+ lesson:'A skill is a short manual. The AI reads it only when the job matches. The description decides when it loads, so write it as a trigger, not a title.',
+ starter:'---\nname: \ndescription: \n---\n\n',
+ rubric:[
+  R('Has a named header block','Start with --- then name: your-skill-name, then ---.',rx(/^\s*---[\s\S]*?\bname\s*:\s*[a-z0-9]/)),
+  R('Description says when to use it','Write description as a trigger: "Use when the user shares a hardpoint sheet and asks...".',rx(/description\s*:[^\n]*(use (this )?(skill )?when|whenever|trigger|if the user)/)),
+  R('Lists the required inputs','Say which file, units and columns the skill expects.',rx(/\b(inputs?|requires?|expects?|needs?)\b/)),
+  R('Gives numbered steps','Number the steps so the AI follows the same order every time.',rx(/(^|\n)\s*(1[.)]|step 1)/)),
+  R('Uses real limits with units','Put the pass limits in, such as 0.10° and 60-110 mm.',rx(/\d+(\.\d+)?\s*(mm|°|deg|%)/,2)),
+  R('Defines the output','Say what comes back: a table with metric, value, limit, status.',rx(/\b(output|report|table|return)\b/)),
+  R('Covers unusual cases and missing data','Say what to do when a sheet or column is missing or units look wrong.',rx(/\b(edge case|missing|invalid|if (the )?(file|sheet|data|column)|fallback|exception|unclear|not found)\b/)),
+  R('Includes a self-check','Add a quick check before reporting, such as normal toe and camber values.',rx(/\b(self-check|verify|validate|sanity|double-check|cross-check|check that)\b/))
+ ],
+ ref:'---\nname: suspension-hardpoint-check\ndescription: Use when the user shares a suspension hardpoint spreadsheet (hardpoints.xlsx) and asks whether toe change, camber gain or roll centre height meet targets.\n---\n# Inputs\nExpects hardpoints.xlsx in mm, vehicle coordinates. If a sheet or column is missing, name it and stop.\n\n# Steps\n1. Load front and rear hardpoints and confirm units are mm.\n2. Sweep wheel travel ±50 mm and compute toe change, camber gain and roll centre height.\n3. Compare with limits: toe change ±0.10°, camber gain −0.6 to −1.0 °/°, roll centre 60-110 mm front and 90-150 mm rear.\n4. Mark each result pass, marginal (within 10% of the limit) or fail.\n\n# Output\nReturn a table: metric, axle, value, limit, status. Add two lines on the worst result.\n\n# Edge cases\nIf coordinates look like metres or use another frame, ask before computing.\n\n# Self-check\nVerify that static values are plausible (toe near 0°, roll centre above ground) before reporting.'
+},
+{
+ id:'agent',zone:'crash',dept:'safety',kind:'Agent',title:'Crash report screener',xp:150,minWords:60,
+ brief:'Tomasz\'s team gets 30 crash test reports a week. An AI agent (a program that uses AI to finish a job in steps) could check them first, but only with clear limits. Design the agent.',
+ data:[['Head injury (HIC15)','limit 700'],['Chest deflection','limit 42 mm'],['Femur load','limit 9.07 kN'],['Sources','Report PDFs, requirements database (PLM), test archive'],['Note','Training values only, not for official approval']],
+ task:'Write the agent brief. Cover: role, goal, tools, rules, when a human checks the work, output format and when the agent stops.',
+ lesson:'An agent is a prompt, plus tools, plus a loop that repeats until the job is done. Decide what it may use, when a person must check its work, and when it stops.',
+ rubric:[
+  R('States role and goal','Open with who the agent is and the one job it does.',rx(/\b(role|goal|you are|objective|purpose|mission)\b/)),
+  R('Lists the tools it may use','Name each tool and the access level: read-only reports, PLM lookup, calculator.',rx(/\b(tools?|access|read|search|calculator|database|plm|api|archive)\b/,2)),
+  R('Sets hard guardrails','Say what it must never do, such as edit a report or declare a pass.',rx(/\b(guardrails?|never|must not|do not|forbidden|read-only|not allowed|permission)\b/)),
+  R('Requires a human to check the result','Define what goes to a person. A person always makes the final call.',rx(/\b(human|approv\w*|sign.?off|escalat\w*|engineer reviews?|reviewer)\b/)),
+  R('Defines a structured output','Give the fields: report ID, metric, value, limit, status, page.',rx(/\b(json|schema|fields?|table|template|format)\b/)),
+  R('Defines when to stop','Add a stop rule: all metrics done, or a cap on tool calls.',rx(/\b(stop|done when|terminate|finish when|max(imum)?\s+\d+|budget|limit of \d+|iterations?)\b/)),
+  R('Requires sources for every value','Ask it to log tool calls and cite the page for every value.',rx(/\b(log|trace|audit|cite|source|reference|page)\b/)),
+  R('Uses the injury limits','Bring in the HIC, chest and femur limits so it can screen results.',rx(/\b(hic|chest|femur|700|42 ?mm|9\.07)\b/))
+ ],
+ ref:'Role: crash report pre-screening agent for the passive safety team. Goal: read each new crash test report and flag results that need an engineer\'s attention.\nTools: read-only access to the report PDFs, the PLM requirement database and the test archive, plus a calculator. No write access, no email.\nGuardrails: never change a requirement or a report; never state that a car passes a regulation. Treat limits as training values: HIC15 700, chest deflection 42 mm, femur load 9.07 kN.\nEscalation: any value above 90% of a limit, any missing channel, or any unreadable page goes to a human reviewer. The final decision is always signed off by an engineer.\nOutput: JSON with fields report_id, metric, value, limit, status (ok, watch, escalate) and page_reference.\nStop when every metric is processed, or after 40 tool calls, then hand back with a summary.\nLog every tool call and cite the page for each value.'
+},
+{
+ id:'dvpr',zone:'validation',dept:'validation',kind:'Prompt',title:'First draft DVP&R',xp:150,minWords:40,
+ brief:'A new EV coolant pump needs a DVP&R (design verification plan and report) draft by Friday. Sana owns validation. She wants the AI to make a first version she can edit.',
+ data:[['Flow','≥ 12 L/min at 60 kPa'],['Life','8,000 h'],['Ambient range','−40 to 105 °C'],['Fluid','50/50 water-glycol'],['Supply','12 V, 9-16 V operating']],
+ task:'Write the prompt that makes the DVP&R draft. Focus on structure, links to requirements, and the questions the AI must ask you.',
+ lesson:'When the AI lacks information, you want questions, not guesses. Tell it to list its assumptions and open questions first.',
+ rubric:[
+  R('Gives the AI a role',ROLE_TIP,ROLE),
+  R('Asks for test method, sample size and pass criteria','Name the table columns you need: test method, sample size, duration, pass criteria.',rx(/\b(test method|sample size|acceptance|pass.?fail|duration)\b/,2)),
+  R('Ties each test to a requirement','Ask for a requirement ID on every row so nothing is untraceable.',rx(/\b(requirement|spec|traceab\w*|trace|req id|each test)\b/)),
+  R('Points to standards','Ask for the relevant ISO, SAE or IEC standard, or "to be confirmed".',rx(/\b(iso|sae|iec|lv ?\d+|standards?|din)\b/)),
+  R('Asks for failure modes or risks','Ask which failure mode each test targets.',rx(/\b(failure mode|fmea|risk|worst.?case|failure)\b/)),
+  R('Asks for assumptions and open questions','Tell it to list assumptions and ask before guessing.',rx(/\b(assum\w*|open questions?|clarif\w*|ask me|unknown|missing)\b/)),
+  R('Uses the requirements','Bring in the flow, life, temperature and supply numbers.',rx(/(\{[^}]+\}|\[[^\]]+\]|\b12 ?l\/min\b|\b8,?000\b|\b105\b|coolant pump)/))
+ ],
+ ref:'You are a validation engineer for EV thermal components. Draft a DVP&R for the coolant pump using {requirements}. Return a table with columns: Test, Requirement ID, Standard (ISO or SAE where one applies), Test method, Sample size, Duration, Acceptance criteria, Failure mode targeted.\nCover flow at 60 kPa, 8,000 h durability, −40 to 105 °C thermal cycling and 9-16 V supply. Before the table, list your assumptions and up to five open questions. Do not invent standard numbers; write "to be confirmed" instead.'
+},
+{
+ id:'eightd',zone:'quality',dept:'quality',kind:'Prompt',title:'Seal leak 8D',xp:150,minWords:40,
+ brief:'Door seal water leaks at end-of-line jumped from 0.4% to 3.2% on line 2 since Monday. A new seal lot from a supplier arrived the same day. Nia must open an 8D (a problem-solving report with eight steps) and wants a draft of D2 to D4.',
+ data:[['Defect rate','3.2% on line 2 (line 1: 0.4%)'],['Start','Monday, first shift'],['Change','New seal lot from Supplier B, same day'],['Detection','End-of-line water test']],
+ task:'Write the prompt that drafts the problem description, containment and a cause-search plan. Do not name a cause too early.',
+ lesson:'Early in an 8D, the big risk is a confident wrong answer. Ask for what is and is not affected, containment first, and data that proves each cause.',
+ rubric:[
+  R('Gives the AI a role',ROLE_TIP,ROLE),
+  R('Asks for an IS / IS NOT table','Ask what, where, when and how much, and where the problem is not.',rx(/\b(is\s*\/?\s*is[\s-]*not|is and is not|5w2h|where it is not)\b/)),
+  R('Puts containment first','Ask for containment actions: hold suspect stock, sort output, add checks.',rx(/\b(contain\w*|quarantine|sort\w*|hold|stop.?ship|segregat\w*)\b/)),
+  R('Asks for a cause-search method','Name a method: fishbone, 5 Whys, fault tree.',rx(/\b(fishbone|ishikawa|5.?whys?|fault tree|hypothes\w*)/)),
+  R('Asks what data proves each cause','Ask for the data or test that would confirm or reject each candidate.',rx(/\b(prove|verify|confirm|data|measure\w*|evidence|test)\b/)),
+  R('Warns against blaming too early','Tell the AI not to blame the supplier or conclude before data confirms it.',rx(/(do not|don't|never|avoid)[^.]{0,60}(blame|conclude|assume|speculat|jump)/)),
+  R('Specifies a format','Name the layout: a table per step, D2, D3 and D4 headings, one page.',rx(/\b(table|bullets?|template|format|sections?|d2|d3|d4)\b/))
+ ],
+ ref:'You are a quality engineer leading an 8D for a door seal leak. Facts: {facts}. Draft D2 to D4.\nD2: an IS / IS NOT table (what, where, when, how much). D3: containment actions in priority order, for example hold suspect Supplier B stock, sort line 2 output, add the water test on line 1. D4: a fishbone with candidate causes and, for each, the data that would prove or reject it.\nDo not name a root cause or blame the supplier before data confirms it. Use a table for each step and keep it under one page.'
+},
+{
+ id:'release',zone:'review',dept:null,kind:'Workflow',title:'Gate 4 release pack',xp:200,minWords:80,needs:4,
+ brief:'The Gate 4 release review is on Thursday. Nobody has time to read 400 pages of test evidence. Design a multi-agent workflow (several AI agents working together) that prepares the review pack. Use the skills and prompts you built on the way here.',
+ data:[['Inputs','Requirements list, test reports, open defect list, supplier status'],['Output','Release readiness pack with a go / no-go recommendation'],['Decision owner','Programme chief engineer (human)']],
+ task:'Describe the workflow. Cover: the lead agent (orchestrator), at least three specialist agents, what each hands over, how conflicts are solved, and where a person decides.',
+ lesson:'Multi-agent systems fail at the hand-offs, when one agent passes work to the next. Write down every hand-off (input, output, format). Decide in advance who settles a conflict.',
+ rubric:[
+  R('Names a lead agent (orchestrator)','Add one lead agent that plans, gives out tasks and combines the results.',rx(/\b(orchestrat\w*|coordinator|supervisor|lead agent|manager agent)/)),
+  R('Defines at least three specialist agents','Name three or more agents, each with one narrow job.',t=>((t.match(/\bagents?\b/g)||[]).length>=4)),
+  R('Defines the hand-offs','For each agent, say what it receives and what it returns.',rx(/\b(hand-?offs?|passes? (its|the)|inputs?|outputs?|contract|schema|returns?)\b/,3)),
+  R('Uses skills or reusable instructions','Say which agent loads which skill or playbook.',rx(/\b(skills?|skill file|reusable|playbook)\b/)),
+  R('Resolves conflicting findings','Decide what happens when agents disagree. Never hide it.',rx(/\b(conflicts?|disagree\w*|contradict\w*|tie.?break\w*|discrepanc\w*|reconcil\w*)/)),
+  R('Keeps a human decision point','Name the human who signs off the go / no-go decision.',rx(/\b(human|sign.?off|approv\w*|chief engineer|decision owner|go\s*\/\s*no.?go)\b/)),
+  R('Handles failures and keeps a record','Cover retries or escalation, and log every claim with its source.',both(rx(/\b(retry|fallback|timeout|fail\w*|error|escalat\w*)/),rx(/\b(log\w*|audit|trace|evidence|cite)/)))
+ ],
+ ref:'Orchestrator agent: reads the Gate 4 checklist, sends tasks to three specialist agents, merges their answers and drafts the go / no-go recommendation.\nRequirements agent: input is the requirements list; output is a table of requirement, status and linked test. It uses the requirement-trace skill.\nTest evidence agent: input is the test reports; output is pass, fail or missing per requirement, with page references. It uses the report-review skill.\nRisk agent: input is the open defect list and supplier status; output is the top five risks with severity and owner.\nHand-offs use one JSON schema (id, status, evidence, confidence) so the orchestrator never parses free text.\nIf agents disagree, for example tests passed but a defect is open, the orchestrator lists both findings and marks the item as a conflict. It never picks silently.\nIf an agent fails or times out, retry once, then escalate with the item marked "no evidence".\nEvery claim is logged with its source for audit.\nThe programme chief engineer reviews the pack and signs off the go / no-go decision.'
+}
+];
+
+return {DISCIPLINES,RANKS,MISSIONS,PASS:60};
+})();
+
+</script>
+<script>
+(function(){
+'use strict';
+const AP=window.AP;
+const $=s=>document.querySelector(s);
+const app=$('#app'),canvas=$('#view');
+const STORE='apex-prompt-works-v1';
+const state={playing:false,modal:false,disc:null,done:{},progress:{xp:0,passed:0,rank:'Trainee',done:{}},drafts:{},name:'',csrf:'',provider:'mock',sessionReady:false,connected:false,socket:null};
+try{const s=JSON.parse(localStorage.getItem(STORE)||'null');if(s){state.disc=s.disc||null;state.drafts=s.drafts||{};state.name=s.name||'';}}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify({disc:state.disc,drafts:state.drafts,name:state.name}));}catch(e){}}
+function applyProgress(value){state.progress=value||{xp:0,passed:0,rank:'Trainee',done:{}};state.done=state.progress.done||{};}
+async function api(path,body,method){
+  const verb=method||(body?'POST':'GET');
+  const needsCsrf=verb!=='GET';
+  const response=await fetch(path,{method:verb,credentials:'same-origin',headers:needsCsrf?{'content-type':'application/json','x-csrf-token':state.csrf}:{},body:body?JSON.stringify(body):undefined});
+  const data=response.status===204?{}:await response.json().catch(()=>({error:'Invalid service response'}));
+  if(!response.ok)throw new Error(data.error||'Game service request failed');
+  return data;
+}
+
+const MISSIONS=AP.MISSIONS,byId={};MISSIONS.forEach((m,i)=>{byId[m.id]=m;m.n=i+1;});
+const discById={};AP.DISCIPLINES.forEach(d=>discById[d.id]=d);
+// Vietnamese mission text, shown only when the in-mission toggle is on. Rubric entries are [label, tip] in rubric order.
+const VI={
+onboard:{title:'Sửa một câu hỏi chung chung',brief:'Marta ở quầy lễ tân đưa cho bạn một chiếc laptop. Người mới thường gửi cho trợ lý AI của nhóm một câu ngắn như: "Tell me about brake noise." Các câu trả lời dài và không hữu ích.',task:'Viết lại tin nhắn thành một prompt rõ ràng cho kỹ sư NVH phanh. Hãy tự tạo các chi tiết thực tế.',lesson:'Một prompt kỹ thuật tốt có năm phần: Vai trò, Bối cảnh, Nhiệm vụ, Định dạng và Ràng buộc. Thiếu một phần, AI sẽ đoán.',data:null,rubric:[['Cho AI một vai trò','Bắt đầu bằng một vai trò, ví dụ "Bạn là kỹ sư kiểm tra động cơ". Vai trò quyết định cách dùng từ và độ sâu.'],['Thêm bối cảnh thực tế (xe, điều kiện, chi tiết phần)','Nêu tên xe, tốc độ, nhiệt độ hoặc bộ phận phanh để câu trả lời sát thực tế.'],['Nêu nhiệm vụ cụ thể','Dùng một động từ rõ ràng: chẩn đoán, xếp hạng, so sánh, tóm tắt, đề xuất.'],['Quy định định dạng đầu ra','Nói rõ bạn muốn nhận gì: bảng, năm gạch đầu dòng, dưới 200 từ.'],['Đặt ràng buộc','Thêm giới hạn: những việc không được làm, và cần làm gì khi thiếu thông tin.'],['Có đủ bối cảnh (từ 40 trở lên)','Viết ít nhất 40 từ. Prompt quá ngắn khiến AI phải đoán.']]},
+dyno:{title:'Báo cáo dyno, một trang',brief:'Ravi đã chạy động cơ xăng turbo 2.0 L trên băng thử dyno (bệ thử động cơ) qua đêm. Kỹ sư trưởng đọc báo cáo lúc 08:30. Ông muốn một trang, không phải bảng tính.',data:[['Mô-men xoắn cực đại','342 Nm ở 2.100 vòng/phút (mục tiêu 350)'],['Công suất cực đại','188 kW ở 5.600 vòng/phút (mục tiêu 190)'],['Tiêu hao nhiên liệu (BSFC)','238 g/kWh ở 2.600 vòng/phút, tải 60% (mục tiêu 230)'],['Số lần kích nổ','14 lần ở 4.200 vòng/phút, tải toàn phần'],['Nhiệt độ khí nạp','52 °C (giới hạn buồng thử 45 °C)']],task:'Viết prompt biến dữ liệu này thành bản tóm tắt buổi sáng. Dán số liệu vào, hoặc dùng chỗ giữ như {dyno_data}.',lesson:'Hãy nói cho AI biết ai đọc bản tóm tắt và họ phải ra quyết định gì. Bản tóm tắt cho kỹ sư trưởng khác với bản cho kỹ sư hiệu chỉnh.',rubric:[['Cho AI một vai trò','Bắt đầu bằng một vai trò, ví dụ "Bạn là kỹ sư kiểm tra động cơ". Vai trò quyết định cách dùng từ và độ sâu.'],['Đưa dữ liệu vào hoặc chỉ đến dữ liệu','Dán số liệu hoặc dùng chỗ giữ như {dyno_data} để AI làm việc dựa trên dữ kiện.'],['Yêu cầu chênh lệch so với mục tiêu','Yêu cầu so sánh từng giá trị với mục tiêu, kèm phần chênh lệch.'],['Nêu người đọc hoặc quyết định','Nói rõ ai đọc và họ quyết định gì: kỹ sư trưởng, mốc dự án, đi tiếp hay dừng lại.'],['Cố định đơn vị và định dạng','Ghi rõ đơn vị (Nm, kW, g/kWh) và bố cục (bảng, gạch đầu dòng, giới hạn số từ).'],['Chặn số liệu bịa đặt','Bảo AI không được bịa hay ước tính số liệu. Thay vào đó, AI phải liệt kê dữ liệu còn thiếu.'],['Yêu cầu các bước tiếp theo','Kết thúc bằng việc sẽ làm gì tiếp: hành động, người phụ trách, bài thử theo dõi.']]},
+bms:{title:'Một cell yếu',brief:'Sau khi sạc nhanh 150 kW, bộ pin 96 cell trên xe thử EV-07 cho thấy một cell yếu. Nhật ký pin nằm bên dưới. Lena cần danh sách các nguyên nhân có thể trước khi bộ pin quay lại bệ thử.',data:[['Điện áp cell 47','3,612 V (trung bình pin 3,689 V) ở mức sạc 50%'],['Chênh lệch cell lớn nhất','77 mV'],['Dải nhiệt độ module 3','6 °C trong module'],['Điện trở cell 47','Cao hơn 18% so với trung bình module'],['Lịch sử sạc','11 lần sạc nhanh kể từ lần cân bằng cell gần nhất']],task:'Viết prompt để AI xếp hạng các nguyên nhân có thể và đề xuất kiểm tra. Không được nhảy ngay đến một đáp án.',lesson:'Với chẩn đoán, hãy yêu cầu danh sách nguyên nhân được xếp hạng, kèm bằng chứng ủng hộ và phản đối từng nguyên nhân. Một đáp án chắc chắn sẽ che khuất các lựa chọn khác.',rubric:[['Đặt vai trò kỹ sư hệ thống pin','Nêu chuyên môn: "Bạn là kỹ sư hệ thống pin cao cấp".'],['Yêu cầu danh sách nguyên nhân được xếp hạng','Yêu cầu vài nguyên nhân hàng đầu theo thứ tự, thay vì một đáp án.'],['Yêu cầu bằng chứng cho từng nguyên nhân','Hỏi điều gì ủng hộ và điều gì phản đối từng nguyên nhân.'],['Yêu cầu mức độ tin cậy','Yêu cầu mức thấp, trung bình hoặc cao cho từng nguyên nhân.'],['Yêu cầu kiểm tra để xác nhận từng nguyên nhân','Yêu cầu phép thử hoặc phép đo sẽ xác nhận từng nguyên nhân.'],['Có quy tắc an toàn','Nói cho AI biết phải làm gì nếu dữ liệu cho thấy nguy cơ nhiệt hoặc điện áp cao.'],['Tham chiếu dữ liệu nhật ký','Dán nhật ký hoặc chỉ đến nó, ví dụ {bms_log}.']]},
+skill:{title:'Đóng gói một quy trình',brief:'Mỗi tuần Priya kiểm tra thủ công các bảng tọa độ điểm treo hệ thống treo. Điểm treo (hardpoint) là các điểm nối hệ thống treo với thân xe. Cô kiểm tra độ thay đổi toe, độ tăng camber và chiều cao tâm cuộn. Hãy biến quy trình này thành một file kỹ năng (skill) có thể tái sử dụng để AI tải khi cần.',data:[['Độ thay đổi toe trước','±0,10° tối đa, cho ±50 mm di chuyển bánh xe'],['Độ tăng camber','−0,6 đến −1,0 °/° khi thân xe nghiêng'],['Chiều cao tâm cuộn','60-110 mm phía trước, 90-150 mm phía sau'],['File đầu vào','hardpoints.xlsx, mm, tọa độ xe']],task:'Viết SKILL.md: khối tiêu đề để AI quyết định khi nào tải kỹ năng, sau đó là các bước làm việc.',lesson:'Skill là một sổ tay ngắn. AI chỉ đọc khi công việc khớp với nó. Mô tả quyết định khi nào skill được tải, vì vậy hãy viết nó như một điều kiện kích hoạt, không phải tiêu đề.',rubric:[['Có khối tiêu đề có tên','Bắt đầu bằng --- rồi name: tên-skill-của-bạn, rồi ---.'],['Mô tả nói khi nào dùng','Viết mô tả như một điều kiện kích hoạt: "Dùng khi người dùng chia sẻ bảng điểm treo và hỏi...".'],['Liệt kê đầu vào bắt buộc','Nêu file, đơn vị và cột mà skill cần.'],['Có các bước được đánh số','Đánh số các bước để AI luôn làm theo cùng một thứ tự.'],['Dùng giới hạn thực tế kèm đơn vị','Đưa giới hạn đạt vào, ví dụ 0,10° và 60-110 mm.'],['Định nghĩa đầu ra','Nêu kết quả trả về: bảng với thông số, giá trị, giới hạn, trạng thái.'],['Bao quát trường hợp bất thường và thiếu dữ liệu','Nêu cần làm gì khi thiếu bảng hoặc cột, hoặc đơn vị có vẻ sai.'],['Có bước tự kiểm tra','Thêm kiểm tra nhanh trước khi báo cáo, ví dụ giá trị toe và camber tĩnh có bình thường không.']]},
+agent:{title:'Bộ sàng lọc báo cáo va chạm',brief:'Nhóm của Tomasz nhận 30 báo cáo thử va chạm mỗi tuần. Một agent AI (chương trình dùng AI để hoàn thành công việc qua nhiều bước) có thể kiểm tra trước, nhưng chỉ khi có giới hạn rõ ràng. Hãy thiết kế agent.',data:[['Chấn thương đầu (HIC15)','giới hạn 700'],['Độ biến dạng ngực','giới hạn 42 mm'],['Lực xương đùi','giới hạn 9,07 kN'],['Nguồn','PDF báo cáo, cơ sở dữ liệu yêu cầu (PLM), kho lưu trữ thử nghiệm'],['Lưu ý','Chỉ là giá trị huấn luyện, không dùng để phê duyệt chính thức']],task:'Viết bản mô tả agent. Bao gồm: vai trò, mục tiêu, công cụ, quy tắc, khi nào người kiểm tra kết quả, định dạng đầu ra và khi nào agent dừng.',lesson:'Agent gồm một prompt, cộng công cụ, cộng một vòng lặp lặp lại cho đến khi xong việc. Quyết định nó được dùng gì, khi nào người phải kiểm tra kết quả, và khi nào nó dừng.',rubric:[['Nêu vai trò và mục tiêu','Mở đầu bằng agent là ai và nó làm một việc chính nào.'],['Liệt kê công cụ được dùng','Nêu từng công cụ và mức truy cập: báo cáo chỉ đọc, tra cứu PLM, máy tính.'],['Đặt rào chắn cứng','Nói rõ những việc nó không bao giờ được làm, ví dụ sửa báo cáo hoặc tuyên bố đạt.'],['Yêu cầu người kiểm tra kết quả','Xác định việc gì phải chuyển cho người. Người luôn là người quyết định cuối cùng.'],['Định nghĩa đầu ra có cấu trúc','Nêu các trường: mã báo cáo, chỉ số, giá trị, giới hạn, trạng thái, trang.'],['Định nghĩa khi nào dừng','Thêm quy tắc dừng: khi đã xử lý xong mọi chỉ số, hoặc giới hạn số lần gọi công cụ.'],['Yêu cầu nguồn cho mọi giá trị','Yêu cầu ghi lại lệnh gọi công cụ và trích trang cho mọi giá trị.'],['Dùng giới hạn chấn thương','Đưa giới hạn HIC, ngực và xương đùi vào để agent sàng lọc kết quả.']]},
+dvpr:{title:'Bản nháp DVP&R đầu tiên',brief:'Một bơm làm mát EV mới cần bản nháp DVP&R (kế hoạch và báo cáo kiểm chứng thiết kế) trước thứ Sáu. Sana phụ trách kiểm chứng. Cô muốn AI tạo phiên bản đầu tiên để cô chỉnh sửa.',data:[['Lưu lượng','≥ 12 L/phút ở 60 kPa'],['Tuổi thọ','8.000 giờ'],['Dải nhiệt độ môi trường','−40 đến 105 °C'],['Chất lỏng','Glycol-nước 50/50'],['Nguồn cấp','12 V, hoạt động 9-16 V']],task:'Viết prompt để tạo bản nháp DVP&R. Tập trung vào cấu trúc, liên kết với yêu cầu, và các câu hỏi AI phải hỏi bạn.',lesson:'Khi AI thiếu thông tin, bạn cần câu hỏi, không phải phỏng đoán. Yêu cầu nó liệt kê giả định và câu hỏi mở trước.',rubric:[['Cho AI một vai trò','Bắt đầu bằng một vai trò, ví dụ "Bạn là kỹ sư kiểm tra động cơ". Vai trò quyết định cách dùng từ và độ sâu.'],['Yêu cầu phương pháp thử, cỡ mẫu và tiêu chí đạt','Nêu các cột bảng cần có: phương pháp thử, cỡ mẫu, thời gian, tiêu chí đạt.'],['Gắn mỗi phép thử với một yêu cầu','Yêu cầu mã yêu cầu ở mỗi dòng để không có phép thử nào thiếu truy vết.'],['Chỉ đến tiêu chuẩn','Yêu cầu tiêu chuẩn ISO, SAE hoặc IEC liên quan, hoặc ghi "sẽ xác nhận".'],['Yêu cầu các chế độ hỏng hoặc rủi ro','Hỏi mỗi phép thử nhắm vào chế độ hỏng nào.'],['Yêu cầu giả định và câu hỏi mở','Yêu cầu liệt kê giả định và hỏi trước khi đoán.'],['Dùng các yêu cầu','Đưa các số liệu lưu lượng, tuổi thọ, nhiệt độ và nguồn cấp vào.']]},
+eightd:{title:'Rò rỉ gioăng cửa, 8D',brief:'Tỷ lệ nước rò qua gioăng cửa khi kết thúc dây chuyền tăng từ 0,4% lên 3,2% trên line 2 kể từ thứ Hai. Một lô gioăng mới từ nhà cung cấp về cùng ngày. Nia phải mở một 8D (báo cáo giải quyết vấn đề gồm tám bước) và muốn bản nháp D2 đến D4.',data:[['Tỷ lệ lỗi','3,2% trên line 2 (line 1: 0,4%)'],['Bắt đầu','Thứ Hai, ca đầu'],['Thay đổi','Lô gioăng mới từ Nhà cung cấp B, cùng ngày'],['Phát hiện','Thử nước khi kết thúc dây chuyền']],task:'Viết prompt để soạn mô tả vấn đề, biện pháp ngăn chặn và kế hoạch tìm nguyên nhân. Không nêu nguyên nhân quá sớm.',lesson:'Ở giai đoạn đầu của 8D, rủi ro lớn nhất là một câu trả lời chắc chắn nhưng sai. Hỏi điều gì bị ảnh hưởng và không bị ảnh hưởng, ngăn chặn trước, và dữ liệu chứng minh từng nguyên nhân.',rubric:[['Cho AI một vai trò','Bắt đầu bằng một vai trò, ví dụ "Bạn là kỹ sư kiểm tra động cơ". Vai trò quyết định cách dùng từ và độ sâu.'],['Có bảng CÓ / KHÔNG CÓ','Hỏi cái gì, ở đâu, khi nào, bao nhiêu, và nơi vấn đề không xảy ra.'],['Đặt ngăn chặn lên đầu','Yêu cầu các biện pháp ngăn chặn: giữ hàng nghi ngờ, phân loại sản phẩm, thêm kiểm tra.'],['Yêu cầu phương pháp tìm nguyên nhân','Nêu một phương pháp: xương cá, 5 Whys, cây lỗi.'],['Hỏi dữ liệu chứng minh từng nguyên nhân','Yêu cầu dữ liệu hoặc phép thử sẽ xác nhận hoặc loại bỏ từng ứng viên.'],['Cảnh báo không đổ lỗi quá sớm','Bảo AI không đổ lỗi cho nhà cung cấp hay kết luận trước khi có dữ liệu xác nhận.'],['Quy định định dạng','Nêu bố cục: bảng cho mỗi bước, tiêu đề D2, D3 và D4, một trang.']]},
+release:{title:'Bộ hồ sơ phát hành Gate 4',brief:'Buổi đánh giá phát hành Gate 4 vào thứ Năm. Không ai có thời gian đọc 400 trang bằng chứng thử nghiệm. Hãy thiết kế quy trình đa agent (nhiều agent AI cùng làm việc) để chuẩn bị bộ hồ sơ đánh giá. Hãy dùng các skill và prompt bạn đã xây dựng trên đường đến đây.',data:[['Đầu vào','Danh sách yêu cầu, báo cáo thử nghiệm, danh sách lỗi đang mở, tình trạng nhà cung cấp'],['Đầu ra','Bộ hồ sơ sẵn sàng phát hành kèm khuyến nghị đi tiếp / dừng lại'],['Người quyết định','Kỹ sư trưởng chương trình (con người)']],task:'Mô tả quy trình. Bao gồm: agent điều phối chính (orchestrator), ít nhất ba agent chuyên môn, mỗi agent bàn giao gì, cách giải quyết xung đột, và chỗ con người quyết định.',lesson:'Hệ thống đa agent thường hỏng ở các điểm bàn giao, khi agent này chuyển việc cho agent kế tiếp. Ghi lại mọi điểm bàn giao (đầu vào, đầu ra, định dạng). Quyết định trước ai là người giải quyết xung đột.',rubric:[['Đặt tên agent điều phối chính (orchestrator)','Thêm một agent chính để lập kế hoạch, giao việc và tổng hợp kết quả.'],['Định nghĩa ít nhất ba agent chuyên môn','Nêu ba agent trở lên, mỗi agent có một việc hẹp.'],['Định nghĩa các điểm bàn giao','Với mỗi agent, nói rõ nó nhận gì và trả về gì.'],['Dùng skill hoặc hướng dẫn tái sử dụng','Nói agent nào tải skill hoặc sổ tay nào.'],['Giải quyết kết quả mâu thuẫn','Quyết định điều gì xảy ra khi các agent không đồng ý. Không được giấu.'],['Giữ điểm quyết định cho con người','Nêu người ký duyệt quyết định đi tiếp / dừng lại.'],['Xử lý lỗi và lưu hồ sơ','Bao gồm thử lại hoặc chuyển cấp, và ghi lại mọi khẳng định kèm nguồn.']]}
+};
+const totalXp=()=>state.progress.xp||0;
+const passedCount=()=>state.progress.passed||0;
+const rankIdx=xp=>{let r=0;AP.RANKS.forEach((k,i)=>{if(xp>=k.min)r=i;});return r;};
+const progress=()=>state.progress;
+const isLocked=m=>!!m.needs&&passedCount()<m.needs;
+
+/* ---------- Toast ---------- */
+let toastT=0;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true;},3800);}
+
+/* ---------- 3D setup ---------- */
+let gl=null;
+if(typeof THREE!=='undefined'){try{gl=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){gl=null;}}
+const scene=gl?new THREE.Scene():null;
+const camera=gl?new THREE.PerspectiveCamera(70,1,0.1,100):null;
+const colliders=[],npcs=[],texRedraw=[];
+const LOGO='data:image/png;base64,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';
+const logoImg=new Image();
+logoImg.onload=()=>{texRedraw.forEach(f=>f());};
+logoImg.src=LOGO;
+document.querySelectorAll('img[data-logo]').forEach(i=>{i.src=LOGO;});
+const zones=[];
+const matCache={};
+let turntable=null,robot=null;
+
+function mat(color,o){const k=color+JSON.stringify(o||{});if(!matCache[k])matCache[k]=new THREE.MeshStandardMaterial(Object.assign({color:color,roughness:0.75,metalness:0.08},o||{}));return matCache[k];}
+function box(w,h,d,color,x,y,z,o){o=o||{};const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color,o.mat));m.position.set(x,y,z);if(o.ry)m.rotation.y=o.ry;(o.parent||scene).add(m);if(o.solid)colliders.push({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2});return m;}
+function cyl(rt,rb,h,color,x,y,z,o){o=o||{};const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,20),mat(color,o.mat));m.position.set(x,y,z);if(o.rx)m.rotation.x=o.rx;if(o.rz)m.rotation.z=o.rz;(o.parent||scene).add(m);if(o.solid){const r=Math.max(rt,rb);colliders.push({x0:x-r,x1:x+r,z0:z-r,z1:z+r});}return m;}
+function glow(w,h,d,color,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({color:color}));m.position.set(x,y,z);(parent||scene).add(m);return m;}
+function tex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;texRedraw.push(()=>{draw(g,w,h);t.needsUpdate=true;});return t;}
+
+const screenCache={};
+function screenTex(kind){
+  if(screenCache[kind])return screenCache[kind];
+  const big=kind==='check';
+  screenCache[kind]=tex(big?512:256,big?288:160,(g,w,h)=>{
+    g.fillStyle='#0c1822';g.fillRect(0,0,w,h);
+    g.strokeStyle='#1e3a4b';g.lineWidth=1;
+    for(let i=1;i<8;i++){g.beginPath();g.moveTo(0,i*h/8);g.lineTo(w,i*h/8);g.stroke();}
+    if(kind==='bars'){
+      for(let i=0;i<12;i++){const v=0.25+0.6*Math.abs(Math.sin(i*1.3));const bh=v*(h-30);g.fillStyle=i===7?'#ff8a4d':'#34e0c0';g.fillRect(14+i*(w-28)/12,h-12-bh,(w-28)/12-6,bh);}
+    }else if(kind==='check'){
+      const rows=[['#34e0c0',0.86],['#34e0c0',0.7],['#f2b01e',0.5],['#34e0c0',0.78],['#ff6a4d',0.3],['#34e0c0',0.64]];
+      rows.forEach((r,i)=>{const y=34+i*(h-50)/6;g.fillStyle=r[0];g.beginPath();g.arc(34,y+10,10,0,6.3);g.fill();g.fillStyle='#2b4658';g.fillRect(64,y+4,w-110,12);g.fillStyle=r[0];g.fillRect(64,y+4,(w-110)*r[1],12);});
+      g.fillStyle='#cfe3ee';g.font='600 30px "IBM Plex Mono",monospace';g.fillText('GATE 4',20,28);
+    }else{
+      g.lineWidth=2;
+      [['#34e0c0',0],['#ff8a4d',2]].forEach(c=>{g.strokeStyle=c[0];g.beginPath();for(let x=0;x<=w;x+=4){const y=h*0.5+Math.sin(x*0.045+c[1])*h*0.22+Math.sin(x*0.13+c[1]*3)*h*0.07;if(x===0)g.moveTo(x,y);else g.lineTo(x,y);}g.stroke();});
+    }
+  });
+  return screenCache[kind];
+}
+function screen(w,h,x,y,z,ry,kind){
+  const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=ry||0;
+  box(w+0.06,h+0.06,0.04,'#10161c',0,0,-0.03,{parent:g});
+  const p=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:screenTex(kind||'trace')}));
+  g.add(p);scene.add(g);return g;
+}
+function chair(x,z,face){
+  const g=new THREE.Group();g.position.set(x,0,z);
+  box(0.5,0.06,0.5,'#3b4752',0,0.48,0,{parent:g});
+  box(0.5,0.5,0.06,'#3b4752',0,0.78,0.25*face,{parent:g});
+  cyl(0.04,0.04,0.45,'#1b2025',0,0.23,0,{parent:g});
+  scene.add(g);
+}
+function desk(x,z,face){
+  face=face||1;
+  box(1.8,0.06,0.8,'#cdbfa6',x,0.75,z);
+  box(0.05,0.72,0.75,'#8b8f94',x-0.85,0.36,z);
+  box(0.05,0.72,0.75,'#8b8f94',x+0.85,0.36,z);
+  screen(0.72,0.42,x,1.17,z-0.2*face,face<0?Math.PI:0,'trace');
+  chair(x,z+0.85*face,face);
+  colliders.push({x0:x-0.9,x1:x+0.9,z0:z-0.4,z1:z+0.4});
+}
+function person(x,z,color,ry,solid){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry||0;
+  box(0.32,0.5,0.2,'#2a3138',0,0.25,0,{parent:g});
+  cyl(0.2,0.23,0.6,color,0,0.8,0,{parent:g});
+  box(0.08,0.5,0.08,color,-0.27,0.8,0,{parent:g});
+  box(0.08,0.5,0.08,color,0.27,0.8,0,{parent:g});
+  const hd=new THREE.Mesh(new THREE.SphereGeometry(0.15,16,12),mat('#e0b48f'));hd.position.y=1.25;g.add(hd);
+  scene.add(g);npcs.push({g:g,ph:Math.random()*6,y0:0});
+  if(solid)colliders.push({x0:x-0.25,x1:x+0.25,z0:z-0.25,z1:z+0.25});
+}
+function plant(x,z){cyl(0.28,0.22,0.45,'#8d6e5a',x,0.22,z,{solid:true});const s=new THREE.Mesh(new THREE.SphereGeometry(0.42,14,10),mat('#3f8a4f'));s.position.set(x,0.85,z);scene.add(s);const s2=new THREE.Mesh(new THREE.SphereGeometry(0.3,14,10),mat('#4c9d5c'));s2.position.set(x+0.18,1.15,z-0.1);scene.add(s2);}
+function sign(title,sub,color,x,y,z){
+  const g=new THREE.Group();
+  const t=tex(640,160,(c,w,h)=>{c.fillStyle='#13202c';c.fillRect(0,0,w,h);c.fillStyle=color;c.fillRect(0,0,26,h);c.fillStyle='#f3f6f8';c.font='700 80px "Barlow Condensed","Arial Narrow",sans-serif';c.textBaseline='alphabetic';c.fillText(title.toUpperCase(),52,94);c.fillStyle='#9fb0bf';c.font='500 26px "IBM Plex Mono",monospace';c.fillText(sub,54,138);});
+  const m=new THREE.MeshBasicMaterial({map:t});
+  const p1=new THREE.Mesh(new THREE.PlaneGeometry(4.4,1.1),m);p1.position.z=0.03;
+  const p2=new THREE.Mesh(new THREE.PlaneGeometry(4.4,1.1),m);p2.position.z=-0.03;p2.rotation.y=Math.PI;
+  g.add(p1,p2);
+  [-1.9,1.9].forEach(dx=>box(0.04,1.4,0.04,'#59636d',dx,0.95,0,{parent:g}));
+  g.position.set(x,y,z);scene.add(g);
+}
+
+/* Kiosk with floor ring and beacon */
+const STATUS_COL={open:0xf0a81c,done:0x2fa866,locked:0x8a96a3};
+function kiosk(zn){
+  const tx=zn.tp[0],tz=zn.tp[1];
+  const g=new THREE.Group();g.position.set(tx,0,tz);
+  g.rotation.y=Math.atan2(-tx,1-tz);
+  box(0.6,1.05,0.45,'#1f2b36',0,0.52,0,{parent:g});
+  const sm=new THREE.MeshBasicMaterial({color:STATUS_COL.open});
+  const sc=new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.32),sm);sc.position.set(0,1.2,0.12);sc.rotation.x=-0.5;g.add(sc);
+  scene.add(g);
+  colliders.push({x0:tx-0.3,x1:tx+0.3,z0:tz-0.3,z1:tz+0.3});
+  const rm=new THREE.MeshBasicMaterial({color:STATUS_COL.open,transparent:true,opacity:0.85,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(0.95,1.15,40),rm);ring.rotation.x=-Math.PI/2;ring.position.set(tx,0.04,tz);scene.add(ring);
+  const bm=new THREE.MeshBasicMaterial({color:STATUS_COL.open});
+  const beacon=new THREE.Mesh(new THREE.OctahedronGeometry(0.2),bm);beacon.position.set(tx,2.3,tz);scene.add(beacon);
+  zn.mats=[sm,rm,bm];zn.ring=ring;zn.beacon=beacon;
+}
+
+/* ---------- World ---------- */
+const ZONES=[
+ {id:'lobby',name:'Reception',sub:'ONBOARDING DESK',color:'#5a6a78',cx:0,cz:13,tp:[0,11.6],m:'onboard'},
+ {id:'powertrain',name:'Powertrain Lab',sub:'ENGINE DYNO CELL',color:'#d9622b',cx:-16,cz:-9,tp:[-16,-5.6],m:'dyno'},
+ {id:'battery',name:'Battery & EV Lab',sub:'PACK TEST BENCH',color:'#17a2a2',cx:0,cz:-9,tp:[0,-5.6],m:'bms'},
+ {id:'chassis',name:'Chassis Bay',sub:'SUSPENSION LIFT',color:'#3b6fd4',cx:16,cz:-9,tp:[16,-5.6],m:'skill'},
+ {id:'crash',name:'Crash & Safety',sub:'SLED AND BARRIER',color:'#c9a100',cx:-16,cz:3,tp:[-11.6,3],m:'agent'},
+ {id:'validation',name:'Validation Control',sub:'TEST TRACK DESK',color:'#7a4fd0',cx:16,cz:3,tp:[11.6,3],m:'dvpr'},
+ {id:'quality',name:'Quality & Assembly',sub:'END-OF-LINE CHECK',color:'#2f9e5b',cx:-16,cz:13,tp:[-16,9.6],m:'eightd'},
+ {id:'review',name:'Design Review',sub:'GATE 4 TABLE',color:'#13202c',cx:0,cz:1,tp:[4.6,1],m:'release'},
+ {id:'cafe',name:'Cafe',sub:'TAKE FIVE',color:'#8d6e5a',cx:16,cz:13,tp:null,m:null}
+];
+
+function buildWorld(){
+  scene.background=new THREE.Color(0xcfd8df);
+  scene.fog=new THREE.Fog(0xcfd8df,26,72);
+  scene.add(new THREE.HemisphereLight(0xffffff,0x9aa7b3,0.95));
+  const dl=new THREE.DirectionalLight(0xffffff,0.55);dl.position.set(-10,20,8);scene.add(dl);
+
+  const ft=tex(128,128,(g,w,h)=>{g.fillStyle='#d6dde3';g.fillRect(0,0,w,h);g.strokeStyle='#b9c4cd';g.lineWidth=2;g.strokeRect(0,0,w,h);});
+  ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(24,18);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(48,36),new THREE.MeshStandardMaterial({map:ft,roughness:0.85,metalness:0}));
+  floor.rotation.x=-Math.PI/2;scene.add(floor);
+
+  const ceil=new THREE.Mesh(new THREE.PlaneGeometry(48,36),new THREE.MeshStandardMaterial({color:'#f4f6f8',roughness:1}));
+  ceil.rotation.x=Math.PI/2;ceil.position.y=5;scene.add(ceil);
+  const lg=new THREE.BoxGeometry(2.6,0.05,0.9),lm=new THREE.MeshBasicMaterial({color:0xffffff});
+  for(let x=-20;x<=20;x+=8)for(let z=-14;z<=14;z+=7){const l=new THREE.Mesh(lg,lm);l.position.set(x,4.96,z);scene.add(l);}
+
+  box(48.8,5,0.4,'#f2f4f6',0,2.5,-18.2);
+  box(48.8,5,0.4,'#f2f4f6',0,2.5,18.2);
+  box(0.4,5,36,'#f2f4f6',-24.2,2.5,0);
+  box(0.4,5,36,'#f2f4f6',24.2,2.5,0);
+  box(48,0.25,0.1,'#aab6c0',0,0.12,-17.95);box(48,0.25,0.1,'#aab6c0',0,0.12,17.95);
+  const skyT=tex(64,128,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#8fc3e8');gr.addColorStop(1,'#dcefff');g.fillStyle=gr;g.fillRect(0,0,w,h);});
+  for(let i=0;i<7;i++){const x=-21+i*7;const w=new THREE.Mesh(new THREE.PlaneGeometry(4.6,2.2),new THREE.MeshBasicMaterial({map:skyT}));w.position.set(x,2.7,-17.98);scene.add(w);box(0.08,2.2,0.06,'#6c7a86',x,2.7,-17.95);}
+  for(let i=0;i<5;i++){const z=-12+i*6;const w=new THREE.Mesh(new THREE.PlaneGeometry(3.6,2.2),new THREE.MeshBasicMaterial({map:skyT}));w.position.set(23.98,2.7,z);w.rotation.y=-Math.PI/2;scene.add(w);}
+  [[-8,-3],[8,-3],[-8,8],[8,8]].forEach(p=>box(0.8,5,0.8,'#e6eaee',p[0],2.5,p[1],{solid:true}));
+
+  // brand wall behind reception
+  const bt=tex(1024,256,(g,w,h)=>{g.fillStyle='#ffffff';g.fillRect(0,0,w,h);g.fillStyle='#0b4796';g.fillRect(0,h-10,w,10);if(logoImg.complete&&logoImg.naturalWidth)g.drawImage(logoImg,24,6,236,236);g.fillStyle='#0b4796';g.font='700 150px "Barlow Condensed","Arial Narrow",sans-serif';g.fillText('ITK-BGSV',300,150);g.fillStyle='#5f6b73';g.fillRect(300,176,640,52);g.fillStyle='#ffffff';g.font='500 30px "IBM Plex Mono",monospace';g.fillText('ENGINEERING OFFICE · PROMPT WORKS',316,212);});
+  const bw=new THREE.Mesh(new THREE.PlaneGeometry(10,2.5),new THREE.MeshBasicMaterial({map:bt}));bw.position.set(0,3.1,17.97);bw.rotation.y=Math.PI;scene.add(bw);
+
+  ZONES.forEach(z=>{
+    box(11,0.03,8,z.color,z.cx,0.016,z.cz,{mat:{transparent:true,opacity:0.22}});
+    box(11,0.04,0.12,z.color,z.cx,0.02,z.cz-4);box(11,0.04,0.12,z.color,z.cx,0.02,z.cz+4);
+    box(0.12,0.04,8,z.color,z.cx-5.5,0.02,z.cz);box(0.12,0.04,8,z.color,z.cx+5.5,0.02,z.cz);
+    sign(z.name,z.sub,z.color,z.cx,3.75,z.cz);
+    zones.push(z);
+    if(z.tp)kiosk(z);
+  });
+
+  // Powertrain
+  (function(cx,cz){
+    box(2.4,0.12,1.3,'#3a4249',cx-2.2,0.7,cz-2.2,{solid:true});
+    [[-1,-0.5],[1,-0.5],[-1,0.5],[1,0.5]].forEach(p=>box(0.12,0.65,0.12,'#3a4249',cx-2.2+p[0],0.33,cz-2.2+p[1]));
+    box(1.7,0.7,0.9,'#7d8791',cx-2.2,1.15,cz-2.2,{mat:{metalness:0.6,roughness:0.4}});
+    for(let i=0;i<4;i++)cyl(0.19,0.19,0.5,'#5a636c',cx-2.2-0.6+i*0.4,1.7,cz-2.2,{mat:{metalness:0.6,roughness:0.4}});
+    box(1.5,0.18,0.5,'#d9622b',cx-2.2,2.05,cz-2.2);
+    cyl(0.28,0.28,0.12,'#222',cx-3.2,1.15,cz-2.2,{rz:Math.PI/2});
+    box(3.2,1.5,2.1,'#2b333b',cx+2.6,0.75,cz-2.4,{solid:true});
+    box(3.2,0.1,0.35,'#e7b600',cx+2.6,1.52,cz-1.5);
+    box(3.0,0.1,0.35,'#e7b600',cx+2.6,0.9,cz-1.36);
+    screen(1.4,0.8,cx+2.6,2.1,cz-1.34,0,'trace');
+    desk(cx+3.6,cz+1.4);desk(cx-3.4,cz+1.6);
+    person(cx-0.6,cz+0.2,'#d9622b',0.4,true);
+  })(-16,-9);
+
+  // Battery
+  (function(cx,cz){
+    box(3.6,0.8,1.9,'#59636d',cx-1.2,0.4,cz-2.2,{solid:true});
+    box(3.1,0.36,1.6,'#2a3138',cx-1.2,0.98,cz-2.2);
+    for(let i=0;i<3;i++)glow(2.9,0.02,0.07,'#34e0e0',cx-1.2,1.17,cz-2.6+i*0.4);
+    cyl(0.05,0.05,2.2,'#e8761a',cx+0.9,1.25,cz-1.7,{rz:Math.PI/2});
+    box(1.1,2.3,0.9,'#e9edf0',cx+3.0,1.15,cz-2.6,{solid:true});
+    screen(0.7,0.5,cx+3.0,1.6,cz-2.13,0,'bars');
+    glow(0.5,0.08,0.02,'#44e08a',cx+3.0,1.1,cz-2.13);
+    box(2.2,2.5,1.7,'#c7d1d8',cx-4.4,1.25,cz-2.6,{solid:true});
+    const gp=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.2),new THREE.MeshBasicMaterial({color:'#8ab9d4',transparent:true,opacity:0.6}));gp.position.set(cx-4.4,1.4,cz-1.74);scene.add(gp);
+    desk(cx-3.4,cz+1.2);desk(cx+3.4,cz+1.5);
+    person(cx+1.4,cz+0.3,'#17a2a2',-0.5,true);
+  })(0,-9);
+
+  // Chassis
+  (function(cx,cz){
+    [[-1.4,-1.2],[1.4,-1.2],[-1.4,-1.8],[1.4,-1.8]].forEach(p=>box(0.2,1.3,0.2,'#e0a21a',cx+p[0],0.65,cz+p[1]-0.4));
+    box(4.3,0.6,1.8,'#2c4f9e',cx,1.65,cz-1.5,{solid:true,mat:{metalness:0.5,roughness:0.35}});
+    box(2.3,0.55,1.6,'#9fbbe0',cx-0.25,2.2,cz-1.5,{mat:{metalness:0.2,roughness:0.2}});
+    glow(0.06,0.14,0.4,'#fff6c8',cx+2.16,1.7,cz-1.1);glow(0.06,0.14,0.4,'#fff6c8',cx+2.16,1.7,cz-1.9);
+    [[-1.4,-0.95],[1.4,-0.95],[-1.4,0.95],[1.4,0.95]].forEach(p=>cyl(0.4,0.4,0.28,'#1b1d20',cx+p[0],1.2,cz-1.5+p[1],{rx:Math.PI/2}));
+    cyl(0.22,0.22,0.9,'#aab4be',cx+3.8,0.55,cz-2.8,{solid:true,mat:{metalness:0.7,roughness:0.3}});
+    box(0.9,0.9,0.55,'#b92d1b',cx+3.3,0.45,cz+0.6,{solid:true});
+    desk(cx-3.6,cz+1.8);
+    person(cx+2.2,cz+1.0,'#3b6fd4',2.6,true);
+  })(16,-9);
+
+  // Crash
+  (function(cx,cz){
+    box(0.9,3,6,'#9aa3aa',cx-4.8,1.5,cz,{solid:true});
+    for(let i=0;i<6;i++)box(0.04,0.4,1,i%2?'#111':'#e7b600',cx-4.34,2.6,cz-2.5+i);
+    box(3.4,0.2,1.8,'#444c54',cx-1.8,0.3,cz,{solid:true});
+    box(0.5,0.5,1.2,'#7d8791',cx-2.2,0.7,cz);
+    box(0.12,0.7,1.2,'#7d8791',cx-2.5,1.1,cz);
+    box(0.4,0.65,0.45,'#1d1d1d',cx-1.95,1.2,cz);
+    box(0.3,0.15,0.45,'#1d1d1d',cx-1.65,0.95,cz);
+    box(0.5,0.12,0.14,'#1d1d1d',cx-1.45,0.9,cz-0.14);box(0.5,0.12,0.14,'#1d1d1d',cx-1.45,0.9,cz+0.14);
+    const hd=new THREE.Mesh(new THREE.SphereGeometry(0.15,14,10),mat('#e7c200'));hd.position.set(cx-1.95,1.7,cz);scene.add(hd);
+    [[2.2,-1.7],[2.4,1.7]].forEach(p=>{[0,2.1,4.2].forEach(a=>cyl(0.025,0.025,1.3,'#333',cx+p[0]+Math.cos(a)*0.3,0.65,cz+p[1]+Math.sin(a)*0.3));box(0.4,0.25,0.25,'#222',cx+p[0],1.4,cz+p[1]);});
+    cyl(0.04,0.04,2.1,'#59636d',cx+1.2,1.05,cz-3.4);
+    screen(2.1,1.2,cx+1.2,2.0,cz-3.34,0,'trace');
+    person(cx+0.8,cz+1.8,'#c9a100',3.4,true);
+  })(-16,3);
+
+  // Validation
+  (function(cx,cz){
+    box(4.8,0.95,0.9,'#3a444e',cx+0.5,0.47,cz-2.7,{solid:true});
+    [-1.6,0,1.6].forEach(dx=>screen(1.3,0.78,cx+0.5+dx,1.5,cz-2.25,0,'trace'));
+    box(5.2,2.3,0.12,'#10161c',cx+0.5,3.0,cz-3.7);
+    const w=new THREE.Mesh(new THREE.PlaneGeometry(5,2.1),new THREE.MeshBasicMaterial({map:screenTex('trace')}));w.position.set(cx+0.5,3.0,cz-3.63);scene.add(w);
+    box(3.6,0.14,2.4,'#2b2f33',cx+0.5,0.07,cz+1.1);
+    cyl(0.32,0.32,2.0,'#666d74',cx-0.4,0.3,cz+1.1,{rx:Math.PI/2});
+    box(3.3,0.5,1.5,'#e9edf0',cx+0.5,0.85,cz+1.1,{solid:true});
+    box(1.9,0.45,1.3,'#e9edf0',cx+0.4,1.3,cz+1.1);
+    for(let i=0;i<5;i++)box(0.28,0.03,1.5,'#14181c',cx-0.9+i*0.55,1.12,cz+1.1);
+    box(0.4,0.04,1.0,'#14181c',cx+2.1,0.9,cz+1.1);
+    desk(cx+3.8,cz+1.2,-1);
+    person(cx-3.0,cz-0.4,'#7a4fd0',1.0,true);
+  })(16,3);
+
+  // Quality & assembly
+  (function(cx,cz){
+    box(8,0.25,1.2,'#3a3f45',cx,0.8,cz+0.6,{solid:true});
+    for(let i=0;i<5;i++)box(0.15,0.7,1.0,'#59636d',cx-3.6+i*1.8,0.35,cz+0.6);
+    for(let i=0;i<4;i++)box(0.08,0.95,1.05,i===2?'#e7b600':'#9bb0c4',cx-2.6+i*1.9,1.45,cz+0.6,{mat:{metalness:0.4,roughness:0.4}});
+    box(2.2,2.5,1.8,'#a5cfe0',cx+3.4,1.25,cz-2.6,{solid:true,mat:{transparent:true,opacity:0.35}});
+    glow(2.0,0.05,1.6,'#6fe0ff',cx+3.4,2.45,cz-2.6);
+    box(2.0,0.85,1.1,'#d7dde2',cx-3.0,0.43,cz-2.4,{solid:true});
+    glow(1.6,0.04,0.12,'#fff3c8',cx-3.0,0.9,cz-2.0);
+    screen(1.5,0.9,cx-3.0,1.7,cz-3.1,0,'bars');
+    const rg=new THREE.Group();rg.position.set(cx+2.8,0,cz+2.4);scene.add(rg);
+    cyl(0.45,0.55,0.4,'#2e3338',0,0.2,0,{parent:rg});
+    cyl(0.25,0.3,0.8,'#e27a1c',0,0.8,0,{parent:rg});
+    box(0.22,1.4,0.22,'#e27a1c',0,1.6,-0.35,{parent:rg}).rotation.x=0.5;
+    box(0.2,1.1,0.2,'#e27a1c',0,2.0,-1.0,{parent:rg}).rotation.x=-0.7;
+    box(0.35,0.12,0.35,'#222',0,1.55,-1.3,{parent:rg});
+    colliders.push({x0:cx+2.2,x1:cx+3.4,z0:cz+1.8,z1:cz+3.0});
+    robot=rg;
+    person(cx-4.2,cz-0.8,'#2f9e5b',0.6,true);
+  })(-16,13);
+
+  // Reception
+  (function(cx,cz){
+    box(4.2,1.1,0.9,'#1f2b36',0,0.55,15.4,{solid:true});
+    box(4.5,0.08,1.1,'#d9dee3',0,1.14,15.4);
+    screen(0.8,0.46,-0.8,1.55,15.3,Math.PI,'trace');
+    person(0.8,16.4,'#5a6a78',Math.PI,true);
+    const tg=new THREE.Group();tg.position.set(5.2,0,14.2);scene.add(tg);
+    cyl(1.1,1.1,0.3,'#e5e9ed',0,0.15,0,{parent:tg});
+    const car=new THREE.Group();car.position.y=0.3;tg.add(car);
+    box(1.8,0.28,0.8,'#b92d1b',0,0.3,0,{parent:car,mat:{metalness:0.5,roughness:0.3}});
+    box(0.9,0.26,0.72,'#d9dee3',-0.1,0.57,0,{parent:car});
+    [[-0.6,-0.4],[0.6,-0.4],[-0.6,0.4],[0.6,0.4]].forEach(p=>cyl(0.16,0.16,0.12,'#1b1d20',p[0],0.16,p[1],{parent:car,rx:Math.PI/2}));
+    colliders.push({x0:4.1,x1:6.3,z0:13.1,z1:15.3});
+    turntable=car;
+    box(2.6,0.45,0.9,'#5a6a78',-5.4,0.23,16.8,{solid:true});box(2.6,0.5,0.2,'#5a6a78',-5.4,0.7,17.2);
+    plant(-3.2,16.6);plant(7.4,16.6);
+  })(0,13);
+
+  // Design review
+  (function(cx,cz){
+    box(6.2,0.08,1.8,'#2a3a4a',cx,0.8,cz);
+    box(0.12,0.78,1.4,'#59636d',cx-2.6,0.39,cz);box(0.12,0.78,1.4,'#59636d',cx+2.6,0.39,cz);
+    colliders.push({x0:cx-3.1,x1:cx+3.1,z0:cz-0.9,z1:cz+0.9});
+    for(let x=-2.4;x<=2.5;x+=1.2){chair(cx+x,cz-1.35,-1);chair(cx+x,cz+1.35,1);}
+    box(4.4,2.5,0.14,'#1b232b',cx,1.9,cz-3.2,{solid:true});
+    const bd=new THREE.Mesh(new THREE.PlaneGeometry(4.0,2.25),new THREE.MeshBasicMaterial({map:screenTex('check')}));bd.position.set(cx,1.9,cz-3.12);scene.add(bd);
+    person(cx+1.2,cz+2.6,'#13202c',3.1,true);
+  })(0,1);
+
+  // Cafe
+  (function(cx,cz){
+    box(5,1.0,0.8,'#cfd6dc',cx,0.5,17.0,{solid:true});
+    box(0.5,0.6,0.5,'#222a31',cx+1.4,1.3,17.0);glow(0.2,0.06,0.02,'#ff7a45',cx+1.4,1.4,16.74);
+    [[-3,-0.5],[0.5,0.2],[3.2,-1.2]].forEach(p=>{cyl(0.7,0.7,0.06,'#d9c9a8',cx+p[0],0.78,cz+p[1]);cyl(0.06,0.06,0.75,'#59636d',cx+p[0],0.38,cz+p[1],{solid:true});[0,2.1,4.2].forEach(a=>cyl(0.2,0.2,0.05,'#8d6e5a',cx+p[0]+Math.cos(a)*0.95,0.48,cz+p[1]+Math.sin(a)*0.95));});
+    plant(cx-4.8,cz-3.2);plant(cx+4.8,cz-3.2);
+    person(cx+0.5,cz-0.6,'#8d6e5a',1.5,false);
+  })(16,13);
+
+  // loose plants near pillars
+  plant(-22.5,-16.5);plant(22.5,-16.5);plant(-22.5,16.5);
+}
+
+if(gl){buildWorld();}
+
+/* ---------- Status colours ---------- */
+function zoneStatus(z){
+  if(!z.m)return 'none';
+  const m=byId[z.m];
+  if(isLocked(m))return 'locked';
+  const d=state.done[m.id];
+  return d&&d.score>=AP.PASS?'done':'open';
+}
+function refreshMarkers(){
+  if(!gl)return;
+  zones.forEach(z=>{if(!z.mats)return;const s=zoneStatus(z);const c=STATUS_COL[s]||STATUS_COL.open;z.mats.forEach(m=>m.color.setHex(c));});
+}
+
+/* ---------- Player ---------- */
+const P={x:0,z:8.5,yaw:Math.PI,pitch:0};
+const keys={};
+const joy={x:0,y:0};
+function blocked(x,z){
+  const r=0.4;
+  if(x<-23.4||x>23.4||z<-17.4||z>17.4)return true;
+  for(let i=0;i<colliders.length;i++){const c=colliders[i];const qx=Math.max(c.x0,Math.min(x,c.x1)),qz=Math.max(c.z0,Math.min(z,c.z1));const dx=x-qx,dz=z-qz;if(dx*dx+dz*dz<r*r)return true;}
+  return false;
+}
+let near=null,nearKey='',moving=0;
+function step(dt,t){
+  if(state.playing&&!state.modal){
+    let fwd=0,str=0;
+    if(keys.w||keys.arrowup)fwd+=1;if(keys.s||keys.arrowdown)fwd-=1;
+    if(keys.d)str+=1;if(keys.a)str-=1;
+    if(keys.arrowleft)P.yaw+=1.9*dt;if(keys.arrowright)P.yaw-=1.9*dt;
+    fwd+=-joy.y;str+=joy.x;
+    const mag=Math.hypot(fwd,str);if(mag>1){fwd/=mag;str/=mag;}
+    const sp=(keys.shift?6.6:4.1);
+    const sy=Math.sin(P.yaw),cy=Math.cos(P.yaw);
+    const dx=(-sy*fwd+cy*str)*sp*dt,dz=(-cy*fwd-sy*str)*sp*dt;
+    if(!blocked(P.x+dx,P.z))P.x+=dx;
+    if(!blocked(P.x,P.z+dz))P.z+=dz;
+    moving=Math.min(1,mag);
+    let best=null,bd=2.9;
+    for(const z of zones){if(!z.tp)continue;const d=Math.hypot(P.x-z.tp[0],P.z-z.tp[1]);if(d<bd){bd=d;best=z;}}
+    near=best;
+    const st=best?zoneStatus(best):'';
+    const k=best?best.id+st:'';
+    if(k!==nearKey){nearKey=k;updateHint();}
+  }else if(!state.playing){
+    P.x=0;P.z=8.5;P.yaw=Math.PI+Math.sin(t*0.12)*0.5;P.pitch=0;moving=0;
+  }
+  camera.position.set(P.x,1.65+Math.sin(t*9)*0.03*moving,P.z);
+  camera.rotation.order='YXZ';camera.rotation.set(P.pitch,P.yaw,0);
+}
+
+/* ---------- Input ---------- */
+addEventListener('keydown',e=>{
+  if(state.modal){if(e.key==='Escape')closeOverlays();return;}
+  if(!state.playing)return;
+  const k=e.key.toLowerCase();
+  if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','shift'].indexOf(k)>=0){keys[k]=true;if(k.indexOf('arrow')===0)e.preventDefault();}
+  else if(k==='e'||k==='enter'){interact();}
+  else if(k==='m'){openLog();}
+});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+addEventListener('blur',clearKeys);
+function clearKeys(){Object.keys(keys).forEach(k=>keys[k]=false);joy.x=joy.y=0;}
+
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{
+  if(!state.playing||state.modal)return;
+  drag={id:e.pointerId,x:e.clientX,y:e.clientY};
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+  canvas.style.cursor='grabbing';
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;
+  P.yaw-=dx*0.005;P.pitch=Math.max(-1.1,Math.min(1.1,P.pitch-dy*0.004));
+});
+const endDrag=e=>{if(drag&&e.pointerId===drag.id){drag=null;canvas.style.cursor='grab';}};
+canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);
+
+const joyEl=$('#joy'),knob=$('#joyknob');let joyId=null;
+function joyMove(e){
+  const r=joyEl.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  let dx=e.clientX-cx,dy=e.clientY-cy;const max=r.width/2-8;const d=Math.hypot(dx,dy);
+  if(d>max){dx*=max/d;dy*=max/d;}
+  knob.style.transform='translate('+dx+'px,'+dy+'px)';
+  joy.x=dx/max;joy.y=dy/max;if(Math.hypot(joy.x,joy.y)<0.15){joy.x=0;joy.y=0;}
+}
+joyEl.addEventListener('pointerdown',e=>{joyId=e.pointerId;try{joyEl.setPointerCapture(e.pointerId);}catch(_){}joyMove(e);});
+joyEl.addEventListener('pointermove',e=>{if(e.pointerId===joyId)joyMove(e);});
+const joyEnd=e=>{if(e.pointerId===joyId){joyId=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)';}};
+joyEl.addEventListener('pointerup',joyEnd);joyEl.addEventListener('pointercancel',joyEnd);
+
+/* ---------- HUD ---------- */
+function refreshHud(){
+  const d=discById[state.disc]||AP.DISCIPLINES[0];
+  const xp=totalXp(),ri=rankIdx(xp),r=AP.RANKS[ri],nx=AP.RANKS[ri+1];
+  $('#h-disc').textContent=d.name;$('#h-sw').style.background=d.color;
+  $('#h-rank').textContent=r.name;
+  const lo=r.min,hi=nx?nx.min:r.min;
+  $('#h-bar').style.width=(nx?Math.round((xp-lo)/(hi-lo)*100):100)+'%';
+  $('#h-xp').textContent=xp+' XP';
+  $('#h-next').textContent=nx?(nx.min-xp)+' to '+nx.name.split(' ')[0]:'Top rank';
+  $('#h-miss').textContent=passedCount()+' / '+MISSIONS.length;
+  renderSide();
+}
+function renderSide(){
+  $('#s-score').textContent=totalXp()+' XP';
+  const list=presenceUsers().map(u=>u.you?{...u,...progress()}:u).sort((a,b)=>(b.xp||0)-(a.xp||0));
+  $('#s-count').textContent=list.length;
+  const ol=$('#s-list');ol.textContent='';
+  list.forEach((u,i)=>{
+    const li=document.createElement('li');const b=document.createElement('b');b.textContent=(i+1)+'. '+u.name+(u.you?' (you)':'');
+    const sp=document.createElement('span');sp.textContent=(u.xp||0)+' XP';
+    li.append(b,sp);ol.appendChild(li);
+  });
+}
+function updateHint(){
+  const h=$('#hint');
+  if(!near||!near.m||state.modal){h.hidden=true;return;}
+  const m=byId[near.m],lk=isLocked(m),done=state.done[m.id]&&state.done[m.id].score>=AP.PASS;
+  h.hidden=false;h.classList.toggle('locked',lk);
+  $('#hint-t').textContent=lk?'Locked · pass '+m.needs+' missions first ('+passedCount()+'/'+m.needs+')':(done?'Revisit · ':'Open · ')+m.title;
+}
+$('#hint').addEventListener('click',()=>interact());
+function interact(){
+  if(!near||!near.m||state.modal)return;
+  const m=byId[near.m];
+  if(isLocked(m)){toast('Locked. Pass '+m.needs+' missions to open the Gate 4 table ('+passedCount()+' so far).');return;}
+  openMission(m);
+}
+
+/* ---------- Mission sheet ---------- */
+let cur=null;
+function pad(n){return n<10?'0'+n:''+n;}
+function wordsOf(s){return s.trim()?s.trim().split(/\s+/).length:0;}
+let mLang='en';
+function paintMission(m){
+  const v=mLang==='vi'?VI[m.id]:null;
+  const d=m.dept?discById[m.dept]:null;
+  const chip=$('#m-dept');chip.textContent='';
+  const sw=document.createElement('i');sw.style.background=d?d.color:'#5a6a78';chip.appendChild(sw);
+  chip.appendChild(document.createTextNode(d?d.name:(m.id==='release'?'All departments':'Onboarding')));
+  $('#m-title').textContent=v?v.title:m.title;
+  $('#m-brief').textContent=v?v.brief:m.brief;
+  $('#m-task').textContent=v?v.task:m.task;
+  $('#m-lesson').textContent=v?v.lesson:m.lesson;
+  const data=v?v.data:m.data;
+  const dl=$('#m-data');dl.textContent='';
+  if(data){data.forEach(r=>{const row=document.createElement('div');const a=document.createElement('dt');a.textContent=r[0];const b=document.createElement('dd');b.textContent=r[1];row.append(a,b);dl.appendChild(row);});}
+  $('#m-data-wrap').hidden=!m.data;
+  $('#m-l-scen').textContent=v?'Kịch bản':'Scenario';
+  $('#m-l-desk').textContent=v?'Trên bàn làm việc':'On the desk';
+  $('#m-l-task').textContent=v?'Nhiệm vụ':'Your task';
+  $('#m-l-note').textContent=v?'Ghi chú thực địa':'Field note';
+  $('#m-lang').textContent=v?'English':'Tiếng Việt';
+}
+function openMission(m){
+  cur=m;state.modal=true;clearKeys();$('#hint').hidden=true;
+  $('#m-num').textContent=pad(m.n)+' / '+pad(MISSIONS.length);
+  $('#m-kind').textContent=m.kind;
+  const bonus=(m.dept&&m.dept===state.disc);
+  $('#m-xp').textContent=m.xp+' XP'+(bonus?' +20%':'');
+  paintMission(m);
+  $('#m-label').textContent='Your '+(m.kind==='Prompt'?'prompt':m.kind==='Skill'?'skill file':m.kind==='Agent'?'agent brief':'workflow design');
+  const ta=$('#m-text');ta.value=state.drafts[m.id]||'';
+  $('#m-starter').hidden=!m.starter;
+  $('#m-result').hidden=true;
+  const prev=state.done[m.id];
+  $('#m-submit').textContent=prev?'Submit again':'Submit for review';
+  updateWords();
+  $('#mission').hidden=false;
+  $('#mission .sheet').scrollTop=0;
+  if(!matchMedia('(pointer: coarse)').matches)setTimeout(()=>{try{ta.focus({preventScroll:true});}catch(_){}},50);
+}
+function updateWords(){const n=wordsOf($('#m-text').value);$('#m-words').textContent=n+' words'+(cur&&n<cur.minWords?' · aim for '+cur.minWords+'+':'');}
+$('#m-text').addEventListener('input',()=>{if(!cur)return;state.drafts[cur.id]=$('#m-text').value;save();updateWords();});
+$('#m-starter').addEventListener('click',()=>{const ta=$('#m-text');if(!ta.value.trim()){ta.value=cur.starter;}else{ta.value=ta.value+'\n'+cur.starter;}state.drafts[cur.id]=ta.value;save();updateWords();ta.focus();});
+$('#m-submit').addEventListener('click',submitMission);
+async function submitMission(){
+  const m=cur;if(!m)return;
+  const raw=$('#m-text').value;
+  const button=$('#m-submit');
+  button.disabled=true;button.textContent='Reviewing…';
+  const prevXp=totalXp(),prevRank=rankIdx(prevXp);
+  try{
+    const data=await api('/api/review',{submissionId:crypto.randomUUID(),missionId:m.id,answer:raw});
+    applyProgress(data.progress);
+    const review=data.review,pass=review.score>=AP.PASS;
+    const r={score:review.score,items:m.rubric.map(criterion=>{
+      const item=review.items.find(result=>result.criterionId===criterion.id);
+      return {label:criterion.label,tip:item?item.feedback:criterion.tip,ok:!!item&&item.passed};
+    }),passed:review.items.filter(item=>item.passed).length,short:review.short,words:review.words};
+    $('#r-score').textContent=r.score+'%';
+    $('#r-verdict').textContent=r.short?'Too short to review':review.provider==='mock'?'Not evaluated':(r.score>=85?'Ready for release':pass?'Passes review':'Needs revision');
+    const gain=totalXp()-prevXp;
+    $('#r-xp').textContent=review.provider==='mock'?'No XP awarded in mock grading mode.':(gain>0?'+'+gain+' XP · ':'')+r.passed+' of '+r.items.length+' checks passed'+(r.short?' · '+r.words+' of '+m.minWords+' words minimum':'')+(!pass?' · 60% needed to pass':'');
+    $('#r-summary').textContent=review.summary;
+    lastR=r;renderResult(m,r);
+    $('#r-ref').textContent=m.ref;
+    const res=$('#m-result');res.hidden=false;
+    button.textContent='Submit again';
+    setTimeout(()=>{res.scrollIntoView({block:'nearest',behavior:'smooth'});},30);
+    refreshHud();refreshMarkers();
+    const nr=rankIdx(totalXp());
+    if(nr>prevRank)toast('Promoted to '+AP.RANKS[nr].name+'.');
+    else if(pass)toast('Mission complete.');
+  }catch(error){toast(error.message||'Review failed. Your answer is still saved as a draft.');button.textContent='Try review again';}
+  finally{button.disabled=false;}
+}
+let lastR=null;
+function renderResult(m,r){
+  const v=mLang==='vi'?VI[m.id]:null;
+  const ul=$('#r-list');ul.textContent='';
+  r.items.forEach((it,i)=>{
+    const li=document.createElement('li');li.className=it.ok?'ok':'bad';
+    const tag=document.createElement('span');tag.className='tag';tag.textContent=it.ok?'PASS':'FIX';
+    const d=document.createElement('div');const b=document.createElement('b');b.textContent=v?v.rubric[i][0]:it.label;d.appendChild(b);
+    if(!it.ok){const p=document.createElement('p');p.textContent=v?v.rubric[i][1]:it.tip;d.appendChild(p);}
+    li.append(tag,d);ul.appendChild(li);
+  });
+}
+$('#m-lang').addEventListener('click',()=>{
+  if(!cur)return;
+  mLang=mLang==='vi'?'en':'vi';
+  paintMission(cur);
+  if(lastR&&!$('#m-result').hidden)renderResult(cur,lastR);
+});
+function closeOverlays(){
+  state.modal=false;cur=null;
+  $('#mission').hidden=true;$('#log').hidden=true;$('#users').hidden=true;
+  nearKey='';updateHint();
+}
+$('#m-close').addEventListener('click',closeOverlays);
+$('#mission').addEventListener('pointerdown',e=>{if(e.target===$('#mission'))closeOverlays();});
+
+/* ---------- Mission log ---------- */
+function openLog(){
+  state.modal=true;clearKeys();$('#hint').hidden=true;
+  const ol=$('#l-list');ol.textContent='';
+  MISSIONS.forEach(m=>{
+    const d=state.done[m.id],ok=d&&d.score>=AP.PASS,lk=isLocked(m);
+    const li=document.createElement('li');if(ok)li.className='done';
+    const left=document.createElement('div');const b=document.createElement('b');b.textContent=pad(m.n)+' · '+m.title;
+    const sp=document.createElement('span');const dd=m.dept?discById[m.dept].name:(m.id==='release'?'All departments':'Onboarding');sp.textContent=dd+' · '+m.kind+' · '+m.xp+' XP';
+    left.append(b,sp);
+    const em=document.createElement('em');em.textContent=lk?'Locked':d?d.score+'%'+(ok?' · done':' · retry'):'Not started';
+    li.append(left,em);ol.appendChild(li);
+  });
+  $('#l-sum').textContent=passedCount()+' of '+MISSIONS.length+' passed · '+totalXp()+' XP';
+  resetArm=false;$('#l-reset').textContent='Reset progress';$('#l-reset').classList.remove('warn');
+  $('#log').hidden=false;
+}
+$('#logbtn').addEventListener('click',openLog);
+$('#l-close').addEventListener('click',closeOverlays);
+$('#log').addEventListener('pointerdown',e=>{if(e.target===$('#log'))closeOverlays();});
+$('#l-delete').addEventListener('click',()=>{
+  if(!confirm('Delete your guest profile, answers review history, progress, and local drafts? This cannot be undone.'))return;
+  api('/api/session',{},'DELETE').then(()=>{
+    localStorage.removeItem(STORE);state.playing=false;state.sessionReady=false;state.socket?.close();location.reload();
+  }).catch(error=>toast(error.message||'Could not delete guest data.'));
+});
+let resetArm=false,resetT=0;
+$('#l-reset').addEventListener('click',()=>{
+  const b=$('#l-reset');
+  if(!resetArm){resetArm=true;b.textContent='Tap again to erase';b.classList.add('warn');clearTimeout(resetT);resetT=setTimeout(()=>{resetArm=false;b.textContent='Reset progress';b.classList.remove('warn');},3500);return;}
+  api('/api/reset',{}).then(data=>{
+    applyProgress(data.progress);state.disc=null;state.drafts={};save();buildDiscs();
+    state.playing=false;$('#hud').hidden=true;$('#start').hidden=false;refreshHud();refreshMarkers();closeOverlays();
+    toast('Progress cleared. Choose a discipline and clock in again.');
+  }).catch(error=>toast(error.message||'Could not reset progress.'));
+});
+
+/* ---------- Start screen ---------- */
+const nameIn=$('#name-in');
+nameIn.value=state.name||'';
+const refreshClock=()=>{$('#clockin').disabled=!(state.sessionReady&&state.disc&&gl&&nameIn.value.trim());};
+nameIn.addEventListener('input',refreshClock);
+let presenceUsers=()=>[];
+let publishProgress=()=>{};
+const discs=$('#discs');
+function buildDiscs(){
+  discs.textContent='';
+  AP.DISCIPLINES.forEach(d=>{
+    const b=document.createElement('button');b.type='button';b.className='disc';b.setAttribute('role','radio');b.setAttribute('aria-checked',state.disc===d.id?'true':'false');
+    const t=document.createElement('b');const sw=document.createElement('i');sw.style.background=d.color;t.append(sw,document.createTextNode(d.name));
+    const s=document.createElement('span');s.textContent=d.blurb;
+    b.append(t,s);
+    b.addEventListener('click',()=>{state.disc=d.id;save();buildDiscs();});
+    discs.appendChild(b);
+  });
+  refreshClock();
+  $('#clockin').textContent=Object.keys(state.done).length?'Resume shift':'Clock in';
+}
+buildDiscs();
+if(!gl)$('#nogl').hidden=false;
+$('#clockin').addEventListener('click',()=>{
+  if(!state.disc||!gl||!nameIn.value.trim())return;
+  if(!state.sessionReady){initService();return;}
+  const button=$('#clockin');button.disabled=true;
+  state.name=nameIn.value.trim();
+  api('/api/profile',{name:state.name,disc:state.disc}).then(data=>{
+    applyProgress(data.progress);state.name=data.profile.name;state.disc=data.profile.disc;save();buildDiscs();
+    $('#start').hidden=true;$('#hud').hidden=false;
+    state.playing=true;P.x=0;P.z=8.5;P.yaw=Math.PI;P.pitch=0;
+    if(matchMedia('(pointer: coarse)').matches){$('#joy').hidden=false;$('#help').hidden=true;}
+    refreshHud();refreshMarkers();connectSocket();
+    toast('Walk to the glowing marker at reception to begin.');
+  }).catch(error=>{toast(error.message||'Could not clock in.');}).finally(refreshClock);
+});
+
+function openUsers(){
+  state.modal=true;clearKeys();$('#hint').hidden=true;
+  const ol=$('#u-list');ol.textContent='';
+  const list=presenceUsers().map(u=>u.you?{...u,...progress()}:u).sort((a,b)=>(b.xp||0)-(a.xp||0));
+  if(!list.length){const li=document.createElement('li');const b=document.createElement('b');b.textContent='No one has clocked in yet';li.appendChild(b);ol.appendChild(li);}
+  list.forEach((u,i)=>{
+    const li=document.createElement('li');const left=document.createElement('div');
+    const b=document.createElement('b');b.textContent=(i+1)+'. '+u.name+(u.you?' (you)':'');
+    const sp=document.createElement('span');sp.textContent=[u.disc,u.rank].filter(Boolean).join(' · ');
+    left.append(b,sp);
+    const sc=document.createElement('div');sc.style.cssText='text-align:right;white-space:nowrap';
+    const x=document.createElement('b');x.textContent=(u.xp||0)+' XP';
+    const ps=document.createElement('span');ps.textContent=(u.passed||0)+' missions passed';
+    sc.append(x,document.createElement('br'),ps);
+    li.append(left,sc);ol.appendChild(li);
+  });
+  $('#users').hidden=false;
+}
+$('#users-btn').addEventListener('click',openUsers);
+$('#u-close').addEventListener('click',closeOverlays);
+$('#users').addEventListener('pointerdown',e=>{if(e.target===$('#users'))closeOverlays();});
+
+/* ---------- Minimap ---------- */
+const mapC=$('#map'),mg=mapC.getContext('2d');
+function drawMap(){
+  const W=mapC.width,H=mapC.height,sx=W/48,sz=H/36;
+  mg.fillStyle='#dfe6eb';mg.fillRect(0,0,W,H);
+  mg.strokeStyle='#13202c';mg.lineWidth=2;mg.strokeRect(1,1,W-2,H-2);
+  zones.forEach(z=>{
+    mg.fillStyle=z.color;mg.globalAlpha=0.28;mg.fillRect((z.cx-5.5+24)*sx,(z.cz-4+18)*sz,11*sx,8*sz);
+    mg.globalAlpha=1;mg.strokeStyle=z.color;mg.lineWidth=1;mg.strokeRect((z.cx-5.5+24)*sx,(z.cz-4+18)*sz,11*sx,8*sz);
+    if(z.tp){const s=zoneStatus(z);mg.fillStyle=s==='done'?'#1f7a45':s==='locked'?'#8a96a3':'#e3a008';mg.beginPath();mg.arc((z.tp[0]+24)*sx,(z.tp[1]+18)*sz,3.2,0,6.3);mg.fill();mg.strokeStyle='#13202c';mg.lineWidth=1;mg.stroke();}
+  });
+  mg.save();mg.translate((P.x+24)*sx,(P.z+18)*sz);mg.rotate(-P.yaw);
+  mg.fillStyle='#13202c';mg.beginPath();mg.moveTo(0,-7);mg.lineTo(5,5);mg.lineTo(0,2);mg.lineTo(-5,5);mg.closePath();mg.fill();
+  mg.restore();
+}
+
+/* ---------- Loop ---------- */
+function resize(){
+  if(!gl)return;
+  const w=app.clientWidth||1,h=app.clientHeight||1;
+  gl.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  gl.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+if(gl){
+  resize();
+  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe(app);else addEventListener('resize',resize);
+  if(document.fonts&&document.fonts.load){
+    Promise.all([document.fonts.load('700 80px "Barlow Condensed"'),document.fonts.load('500 26px "IBM Plex Mono"'),document.fonts.load('600 30px "IBM Plex Mono"')]).then(()=>{texRedraw.forEach(f=>f());}).catch(()=>{});
+  }
+  let last=performance.now(),tAll=0,fr=0;
+  const loop=now=>{
+    requestAnimationFrame(loop);
+    const dt=Math.min(0.05,(now-last)/1000);last=now;tAll+=dt;fr++;
+    step(dt,tAll);
+    zones.forEach(z=>{if(!z.beacon)return;z.beacon.rotation.y=tAll*1.6;z.beacon.position.y=2.3+Math.sin(tAll*2+z.cx)*0.12;const s=1+Math.sin(tAll*3+z.cz)*0.06;z.ring.scale.set(s,s,s);});
+    npcs.forEach(n=>{n.g.position.y=Math.sin(tAll*1.8+n.ph)*0.015;n.g.rotation.z=Math.sin(tAll*1.1+n.ph)*0.02;});
+    if(turntable)turntable.rotation.y=tAll*0.6;
+    if(robot)robot.rotation.y=Math.sin(tAll*0.7)*0.9;
+    if(state.playing&&fr%3===0)drawMap();
+    gl.render(scene,camera);
+  };
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Same-origin multiplayer service ---------- */
+const remotes=new Map(),players=new Map();
+let myId='',moveSeq=0,lastSent=0,lastX=-99,lastZ=-99,lastYaw=-99,retryTimer=0,retryMs=500;
+function setNetworkStatus(message,connected){
+  state.connected=!!connected;
+  $('#net-status').textContent=message;
+  $('#service-status').textContent=message;
+}
+function nameLabel(name){
+  const c=document.createElement('canvas');c.width=512;c.height=96;const g=c.getContext('2d');
+  g.fillStyle='rgba(19,32,44,.85)';g.fillRect(0,0,512,96);
+  g.fillStyle='#f3f6f8';g.font='600 42px "IBM Plex Sans",sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(name,256,50);
+  const texture=new THREE.CanvasTexture(c),sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture}));
+  sprite.scale.set(1.6,0.3,1);sprite.position.y=1.75;return sprite;
+}
+function makeAvatar(player){
+  const color=discById[player.disc]?.color||'#546574',g=new THREE.Group();
+  box(0.32,0.5,0.2,'#2a3138',0,0.25,0,{parent:g});
+  cyl(0.2,0.23,0.6,color,0,0.8,0,{parent:g});
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.15,16,12),mat('#e0b48f'));head.position.y=1.25;g.add(head);
+  g.userData.arms=[-1,1].map(side=>{
+    const arm=new THREE.Group();arm.position.set(side*0.27,1.05,0);
+    const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.055,0.55,10),mat(color));sleeve.position.y=-0.275;arm.add(sleeve);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(0.065,10,8),mat('#e0b48f'));hand.position.y=-0.6;arm.add(hand);
+    g.add(arm);return arm;
+  });
+  g.add(nameLabel(player.name||'Engineer'));scene.add(g);return g;
+}
+function upsertPlayer(player){
+  if(!player||player.id===myId)return;
+  players.set(player.id,player);
+  let remote=remotes.get(player.id);
+  if(!remote){remote={g:makeAvatar(player),tx:player.x,tz:player.z,ty:player.yaw};remotes.set(player.id,remote);remote.g.position.set(player.x,0,player.z);}
+  remote.tx=player.x;remote.tz=player.z;remote.ty=player.yaw;
+  renderSide();
+}
+function dropPlayer(id){
+  const remote=remotes.get(id);
+  if(remote){scene.remove(remote.g);remote.g.traverse(object=>{
+    if(object.isSprite){object.material.map?.dispose();object.material.dispose();}
+  });remotes.delete(id);}
+  players.delete(id);renderSide();
+}
+function handleServerMessage(message){
+  if(message.type==='welcome'){
+    myId=message.you;applyProgress(message.progress);
+    players.clear();for(const player of message.players)upsertPlayer(player);
+    setNetworkStatus('Online',true);retryMs=500;refreshHud();refreshMarkers();
+  }else if(message.type==='snapshot'){
+    const next=new Set(message.players.map(player=>player.id));
+    for(const id of players.keys())if(!next.has(id))dropPlayer(id);
+    for(const player of message.players)upsertPlayer(player);
+  }else if(message.type==='join'||message.type==='progress'){
+    if(message.player.id===myId&&message.progress){applyProgress(message.progress);refreshHud();refreshMarkers();}
+    upsertPlayer(message.player);
+  }
+  else if(message.type==='leave')dropPlayer(message.id);
+  else if(message.type==='delta')message.moves.forEach(([id,x,z,yaw])=>{
+    const player=players.get(id);if(player)upsertPlayer({...player,x,z,yaw});
+  });
+  else if(message.type==='correction'){
+    P.x=message.x;P.z=message.z;P.yaw=message.yaw;lastX=-99;lastZ=-99;lastYaw=-99;
+  }else if(message.type==='error')toast(message.message||'Game service error');
+}
+function connectSocket(){
+  clearTimeout(retryTimer);
+  if(!state.sessionReady||!state.playing||state.socket&&state.socket.readyState<2)return;
+  setNetworkStatus('Connecting…',false);
+  const scheme=location.protocol==='https:'?'wss:':'ws:';
+  const socket=new WebSocket(`${scheme}//${location.host}/ws`);state.socket=socket;
+  socket.addEventListener('open',()=>{socket.send(JSON.stringify({type:'hello',v:1}));});
+  socket.addEventListener('message',event=>{
+    try{handleServerMessage(JSON.parse(event.data));}catch(_){toast('Could not read game service update.');}
+  });
+  socket.addEventListener('error',()=>setNetworkStatus('Connection error',false));
+  socket.addEventListener('close',()=>{
+    state.socket=null;setNetworkStatus('Reconnecting…',false);
+    if(state.playing){retryTimer=setTimeout(connectSocket,retryMs);retryMs=Math.min(10000,retryMs*2);}
+  });
+  requestAnimationFrame(function sendMoves(now){
+    if(state.socket!==socket)return;
+    requestAnimationFrame(sendMoves);
+    if(socket.readyState!==WebSocket.OPEN||!state.playing)return;
+    const moved=Math.abs(P.x-lastX)+Math.abs(P.z-lastZ)+Math.abs(P.yaw-lastYaw)>0.01;
+    if(moved&&now-lastSent>=200){
+      lastSent=now;lastX=P.x;lastZ=P.z;lastYaw=P.yaw;
+      socket.send(JSON.stringify({type:'move',seq:moveSeq++,x:P.x,z:P.z,yaw:P.yaw}));
+    }
+  });
+}
+async function initService(){
+  try{
+    const data=await api('/api/session');
+    state.csrf=data.csrfToken;state.provider=data.grading.provider;state.sessionReady=true;applyProgress(data.progress);
+    $('#review-privacy').textContent=state.provider==='mock'?'Mock mode: answers are not sent to an AI provider and do not earn XP.':'Live mode: your answer is sent to Groq for review. Do not include personal or confidential information.';
+    state.name=data.profile.name||state.name;state.disc=data.profile.disc||state.disc;
+    nameIn.value=state.name;save();buildDiscs();refreshHud();refreshMarkers();
+    setNetworkStatus('Service ready',false);refreshClock();
+  }catch(error){
+    setNetworkStatus('Service unavailable',false);$('#clockin').disabled=true;
+    toast(error.message||'Game service is unavailable.');
+  }
+}
+presenceUsers=()=>{
+  const list=[...players.values()].filter(player=>player.name).map(player=>({...player,disc:discById[player.disc]?.name||player.disc,you:false}));
+  if(myId)list.push({id:myId,name:state.name,disc:discById[state.disc]?.name||state.disc,x:P.x,z:P.z,yaw:P.yaw,...progress(),you:true});
+  return list;
+};
+publishProgress=()=>{};
+if(gl)requestAnimationFrame(function animateRemotePlayers(now){
+  requestAnimationFrame(animateRemotePlayers);
+  remotes.forEach(remote=>{
+    remote.g.position.x+=(remote.tx-remote.g.position.x)*0.25;
+    remote.g.position.z+=(remote.tz-remote.g.position.z)*0.25;
+    const speed=Math.hypot(remote.tx-remote.g.position.x,remote.tz-remote.g.position.z);
+    const swing=Math.sin(now/160)*Math.min(1,speed*6)*0.6;
+    remote.g.userData.arms.forEach((arm,index)=>{arm.rotation.x=index?-swing:swing;});
+    remote.g.rotation.y=remote.ty;
+  });
+});
+initService();
+})();
+</script>
+
+</body></html>

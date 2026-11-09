@@ -1,0 +1,28 @@
+{
+  "name": "prompt-works",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "baseline": "node --test tests/baseline.test.mjs",
+    "build": "node tools/generate.mjs && tsc",
+    "test": "npm run build && node --test --test-concurrency=1 tests/*.test.mjs",
+    "start": "node --env-file-if-exists=.env dist/server/index.js",
+    "load": "node tools/load.mjs",
+    "test:browser": "node tools/browser.mjs",
+    "evaluate": "node --env-file-if-exists=.env tools/evaluate.mjs"
+  },
+  "dependencies": {
+    "parse5": "^7.3.0",
+    "three": "0.128.0",
+    "ws": "^8.18.3",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/ws": "^8.18.1",
+    "playwright": "^1.56.1",
+    "typescript": "^5.9.3"
+  }
+}
