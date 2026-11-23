@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "game",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page"
+  },
+  "send_metrics": false,
+  "account_id": "b4b9f742f28e64118e517db91a9e8414"
+}

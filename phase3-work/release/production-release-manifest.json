@@ -1,0 +1,110 @@
+{
+  "createdAt": "2026-11-12T08:34:35.068672+00:00",
+  "release": "AI grading, feedback alignment, resume and movement recovery",
+  "node": "24.22.2 ARM64",
+  "rollbackWorkerVersion": "34aa0418-714a-4f62-ba26-257e0bbe4d37",
+  "backendArchive": {
+    "path": "release/itk-bgsv-ai-production-backend.tar.gz",
+    "bytes": 44487,
+    "sha256": "8f170adf3fbc0d8053c44dba7e1328facb289ba7e6d65c3f819de3919ed97815"
+  },
+  "backendFiles": [
+    {
+      "path": "deploy/prompt-works-arm64.env.example",
+      "bytes": 894,
+      "sha256": "343e60d7dbf0a3859530d769acef4ac5780dcbb192ad2401d1fbd9621371dd4c"
+    },
+    {
+      "path": "deploy/prompt-works-backup.service",
+      "bytes": 511,
+      "sha256": "c73595242f6b9d5f96563dcd57289f2821869557b76f4d857ca2cd295e07a4fc"
+    },
+    {
+      "path": "deploy/prompt-works-backup.timer",
+      "bytes": 180,
+      "sha256": "f01410f9df5dda85e2960359a848319d6089d6e164f3aa4bd5fd0548322a051e"
+    },
+    {
+      "path": "deploy/prompt-works.service",
+      "bytes": 728,
+      "sha256": "b893c8566b24be445f7ae7a2fc458254e6517cf3c3860c216dc5f46f29507cf9"
+    },
+    {
+      "path": "deploy/promptworks-journald.conf",
+      "bytes": 180,
+      "sha256": "fb4f5899730c5cfd963a8381977e50a2bca7be3e52d32d327476a49aa80b1f20"
+    },
+    {
+      "path": "dist/catalog.json",
+      "bytes": 44028,
+      "sha256": "cabaa2d2db289031caf3b65a3f666be4ad82b570001b3e66d1dfd6f6d8608ba4"
+    },
+    {
+      "path": "dist/server/accounts.js",
+      "bytes": 22415,
+      "sha256": "0491e46efbf646888f4b5f64c8f96b66a77c8fdad4908391a20370507bd89d64"
+    },
+    {
+      "path": "dist/server/catalog.js",
+      "bytes": 335,
+      "sha256": "e5ea79e41fbf2cd19df829685ebe209cd6e1028aa31f27df67a2550d4403652d"
+    },
+    {
+      "path": "dist/server/grader.js",
+      "bytes": 10720,
+      "sha256": "b9454f8422e7762046d9f67ec5d1a65a6c6a00cb11e3ce2e6818174032d630ec"
+    },
+    {
+      "path": "dist/server/grading-jobs.js",
+      "bytes": 9510,
+      "sha256": "096fc34d8a53e65b484b288a8dbfa6b4f3f414918cc9206f3da87f73addf84af"
+    },
+    {
+      "path": "dist/server/grading-provider.js",
+      "bytes": 5716,
+      "sha256": "4ee9d9fda3db96938afc2c4e65b8324674da4dec8133b55e57445a4df923690e"
+    },
+    {
+      "path": "dist/server/index.js",
+      "bytes": 27225,
+      "sha256": "3ba9e587775358b468f9651c3c5f46a1d9d02fdabcbe3598e66e074b9bdb4228"
+    },
+    {
+      "path": "dist/server/protocol.js",
+      "bytes": 2487,
+      "sha256": "b94b300d864e5bcf823e8df98bf5e35fd96e21e1fc09afc249b0496c59f70645"
+    },
+    {
+      "path": "dist/server/room.js",
+      "bytes": 10793,
+      "sha256": "44657c41eca5c9a1373e26fcd91e24d5be192bc0fa7b4fce99e4fd763d63a4d4"
+    },
+    {
+      "path": "dist/server/store.js",
+      "bytes": 9040,
+      "sha256": "c8b4877fbf954580c33be1649907b03fd74d174e037e23782180ac19bdba9f6e"
+    },
+    {
+      "path": "dist/tools/invitations.js",
+      "bytes": 1159,
+      "sha256": "bee7207ecb21d7ff1efb16bd7430b2c2b981724e48134a37c5073c549127fbdc"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 5075,
+      "sha256": "f8612b2f6c36e6c691d50e0861afe046900206f6bada36c994c392bd37f08ca3"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1041,
+      "sha256": "b213a8f7d0b92d1eefeb50024c324dceab77258052642218ae847a3570b4686b"
+    },
+    {
+      "path": "tools/backup.mjs",
+      "bytes": 4038,
+      "sha256": "db1dda95c15d98e302923e14de5cc76995547cb397dbfdb336529fc027fdc59a"
+    }
+  ],
+  "frontendManifest": "cloudflare-game/verification/asset-manifest-production.json",
+  "productionWorkerVersion": "a3e052f9-0ce4-4b00-a564-6b56603f2e34"
+}

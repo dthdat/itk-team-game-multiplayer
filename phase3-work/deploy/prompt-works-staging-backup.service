@@ -1,0 +1,18 @@
+[Unit]
+Description=ITK-BGSV SQLite staging backup
+After=prompt-works-staging.service
+
+[Service]
+Type=oneshot
+User=promptworks-staging
+Group=promptworks-staging
+WorkingDirectory=/opt/prompt-works-staging/app
+EnvironmentFile=/etc/promptworks-staging.env
+ExecStart=/opt/prompt-works-staging/runtime/node /opt/prompt-works-staging/app/tools/backup.mjs backup /var/lib/prompt-works-staging/game.sqlite
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/promptworks-staging /var/lib/prompt-works-staging
+UMask=0077
+LogNamespace=promptworks-staging

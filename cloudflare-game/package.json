@@ -1,0 +1,11 @@
+{
+  "name": "itk-bgsv-cloudflare-game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:assets": "node prepare.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": { "wrangler": "4.159.0" }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "path": "game-config.js",
+    "bytes": 313,
+    "sha256": "dc4c2ca282dfa9471ed8dda91b9eccacd6a39df0af65c872d91797335db7ac57"
+  },
+  {
+    "path": "index.html",
+    "bytes": 152848,
+    "sha256": "8ca652cc6dd569408050d7fb0a0deaf0a6adae92b599105957ad45c13421f428"
+  },
+  {
+    "path": "vendor/three.LICENSE.txt",
+    "bytes": 1081,
+    "sha256": "7dddf7c5b8fd10ee654db8857d75d104b5557889aa5a91fc4ca545ea7c07062f"
+  },
+  {
+    "path": "vendor/three.min.js",
+    "bytes": 603445,
+    "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2"
+  }
+]

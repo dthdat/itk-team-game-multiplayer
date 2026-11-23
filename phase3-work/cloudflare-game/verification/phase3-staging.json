@@ -1,0 +1,81 @@
+{
+  "at": "2026-11-10T15:23:14.438Z",
+  "target": "https://game-staging.itkvn.workers.dev/",
+  "world": {
+    "revision": "128",
+    "missionCount": 8,
+    "unlocked": true,
+    "offlineXp": 0,
+    "meshes": 464,
+    "calls": 49
+  },
+  "accounts": 2,
+  "accountUI": "invite registration, profile save, logout, sign-in on the same separate browser context; restored profile and pending submission",
+  "multiplayer": "two authenticated users: names, disciplines, avatar preferences and movement synchronized through Worker /ws",
+  "reconnect": {
+    "firstRetryMs": 580,
+    "secondRetryMs": 943,
+    "offlineNoTimer": true,
+    "offlineWakeMs": 5857,
+    "backgroundRetryMs": 26906,
+    "foregroundWakeMs": 4783,
+    "backgroundCapMs": 271910
+  },
+  "missionSubmission": {
+    "state": "pending",
+    "mission": "release",
+    "xp": 0
+  },
+  "dashboard": "eight missions, pending submission history and zero-XP leaderboard",
+  "leaderboard": "verified-only; no mock XP",
+  "languageTitles": [
+    "SỬA MỘT CÂU HỎI CHUNG CHUNG",
+    "FIX A VAGUE QUESTION"
+  ],
+  "mobile": {
+    "viewport": 390,
+    "document": 390,
+    "sheet": 356,
+    "client": 356
+  },
+  "websocketURLs": [
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws",
+    "wss://game-staging.itkvn.workers.dev/ws"
+  ],
+  "backendRequests": [
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/account/register",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/profile",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/profile",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/account/register",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/profile",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/profile",
+    "https://game-staging.itkvn.workers.dev/api/submissions",
+    "https://game-staging.itkvn.workers.dev/api/submissions",
+    "https://game-staging.itkvn.workers.dev/api/progress",
+    "https://game-staging.itkvn.workers.dev/api/leaderboard",
+    "https://game-staging.itkvn.workers.dev/api/progress",
+    "https://game-staging.itkvn.workers.dev/api/submissions",
+    "https://game-staging.itkvn.workers.dev/api/leaderboard",
+    "https://game-staging.itkvn.workers.dev/api/account/logout",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/account/login",
+    "https://game-staging.itkvn.workers.dev/api/session",
+    "https://game-staging.itkvn.workers.dev/api/account",
+    "https://game-staging.itkvn.workers.dev/api/account"
+  ],
+  "externalCustomHostnameRequests": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "failedResponses": []
+}

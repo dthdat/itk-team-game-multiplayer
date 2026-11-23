@@ -1,0 +1,6 @@
+# Local development only. Use the same dummy secret in the Node TRUSTED_PROXY_SECRET.
+ENVIRONMENT=local
+ORIGIN_BASE=http://127.0.0.1:32178
+GAME_PROXY_SECRET=replace-with-a-local-random-value-at-least-32-characters
+CF_ACCESS_CLIENT_ID=local-placeholder-access-client-id
+CF_ACCESS_CLIENT_SECRET=local-placeholder-access-client-secret

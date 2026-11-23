@@ -1,0 +1,33 @@
+[Unit]
+Description=ITK-BGSV Prompt Works multiplayer server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=promptworks
+Group=promptworks
+WorkingDirectory=/opt/prompt-works
+EnvironmentFile=/etc/prompt-works/prompt-works.env
+ExecStart=/opt/prompt-works/runtime/node /opt/prompt-works/dist/server/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=45
+MemoryMax=2G
+CPUQuota=150%
+TasksMax=128
+LimitNOFILE=4096
+StandardOutput=journal
+StandardError=journal
+LogNamespace=promptworks
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=200
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/prompt-works
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

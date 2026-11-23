@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily ITK-BGSV SQLite backup
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15m
+Unit=prompt-works-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,33 @@
+[Unit]
+Description=ITK-BGSV Prompt Works isolated staging server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=promptworks-staging
+Group=promptworks-staging
+WorkingDirectory=/opt/prompt-works-staging/app
+EnvironmentFile=/etc/promptworks-staging.env
+ExecStart=/opt/prompt-works-staging/runtime/node /opt/prompt-works-staging/app/dist/server/index.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+MemoryMax=1G
+CPUQuota=75%
+TasksMax=64
+LimitNOFILE=2048
+StandardOutput=journal
+StandardError=journal
+LogNamespace=promptworks-staging
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=100
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/prompt-works-staging /var/backups/promptworks-staging
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+{
+  "name": "itk-bgsv-cloudflare-game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare:assets": "node prepare.mjs",
+    "dev": "wrangler dev --local --port 8787",
+    "dev:phase3": "PHASE3_SERVICE_ENABLED=1 npm run prepare:assets && wrangler dev --local --port 8788",
+    "deploy": "PHASE3_SERVICE_ENABLED=1 npm run prepare:assets && wrangler deploy --name game --keep-vars --env=''",
+    "dev:staging": "PHASE3_SERVICE_ENABLED=1 npm run prepare:assets && wrangler dev --local --env staging --port 8788",
+    "deploy:staging": "PHASE3_SERVICE_ENABLED=1 npm run prepare:assets && wrangler deploy --env staging"
+  },
+  "devDependencies": {
+    "wrangler": "^4.160.0"
+  }
+}

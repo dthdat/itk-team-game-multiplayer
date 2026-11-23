@@ -1,0 +1,66 @@
+{
+  "at": "2026-11-10T04:06:56.372Z",
+  "target": "https://game.itkvn.workers.dev/",
+  "world": {
+    "three": "128",
+    "meshes": 464,
+    "npcs": 9,
+    "drawCalls": 49,
+    "triangles": 2426,
+    "missions": 8,
+    "allUnlocked": true,
+    "position": {
+      "x": 0,
+      "z": 8.5,
+      "yaw": 3.141592653589793,
+      "pitch": 0
+    }
+  },
+  "movement": true,
+  "missionLanguageChecks": [
+    {
+      "english": "FIX A VAGUE QUESTION",
+      "vietnamese": "SỬA MỘT CÂU HỎI CHUNG CHUNG"
+    },
+    {
+      "english": "DYNO RUN, ONE PAGE",
+      "vietnamese": "BÁO CÁO DYNO, MỘT TRANG"
+    },
+    {
+      "english": "ONE WEAK CELL",
+      "vietnamese": "MỘT CELL YẾU"
+    },
+    {
+      "english": "PACKAGE A ROUTINE",
+      "vietnamese": "ĐÓNG GÓI MỘT QUY TRÌNH"
+    },
+    {
+      "english": "CRASH REPORT SCREENER",
+      "vietnamese": "BỘ SÀNG LỌC BÁO CÁO VA CHẠM"
+    },
+    {
+      "english": "FIRST DRAFT DVP&R",
+      "vietnamese": "BẢN NHÁP DVP&R ĐẦU TIÊN"
+    },
+    {
+      "english": "SEAL LEAK 8D",
+      "vietnamese": "RÒ RỈ GIOĂNG CỬA, 8D"
+    },
+    {
+      "english": "GATE 4 RELEASE PACK",
+      "vietnamese": "BỘ HỒ SƠ PHÁT HÀNH GATE 4"
+    }
+  ],
+  "mobile": {
+    "viewport": 390,
+    "document": 390,
+    "sheet": 356,
+    "sheetClient": 356
+  },
+  "errors": [],
+  "consoleErrors": [],
+  "failures": [],
+  "backendRequests": [],
+  "grading": "Unavailable; explicit message; zero XP",
+  "multiplayer": "Disconnected; no peers or backend simulated"
+}

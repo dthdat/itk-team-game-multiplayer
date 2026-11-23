@@ -1,0 +1,79 @@
+{
+  "at": "2026-11-10T08:47:18.952Z",
+  "target": "http://127.0.0.1:18788/",
+  "world": {
+    "revision": "128",
+    "missionCount": 8,
+    "unlocked": true,
+    "offlineXp": 0,
+    "meshes": 464,
+    "calls": 49
+  },
+  "accounts": 2,
+  "accountUI": "invite registration, profile save, logout, sign-in on the same separate browser context; restored profile and pending submission",
+  "multiplayer": "two authenticated users: names, disciplines, avatar preferences and movement synchronized through Worker /ws",
+  "reconnect": {
+    "firstRetryMs": 547,
+    "secondRetryMs": 1115,
+    "offlineNoTimer": true,
+    "offlineWakeMs": 2676,
+    "backgroundRetryMs": 27043,
+    "foregroundWakeMs": 3920,
+    "backgroundCapMs": 300000
+  },
+  "missionSubmission": {
+    "state": "pending",
+    "mission": "release",
+    "xp": 0
+  },
+  "dashboard": "eight missions, pending submission history and zero-XP leaderboard",
+  "leaderboard": "verified-only; no mock XP",
+  "languageTitles": [
+    "SỬA MỘT CÂU HỎI CHUNG CHUNG",
+    "FIX A VAGUE QUESTION"
+  ],
+  "mobile": {
+    "viewport": 390,
+    "document": 390,
+    "sheet": 356,
+    "client": 356
+  },
+  "websocketURLs": [
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws",
+    "ws://127.0.0.1:18788/ws"
+  ],
+  "backendRequests": [
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/account/register",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/profile",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/profile",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/account/register",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/profile",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/profile",
+    "http://127.0.0.1:18788/api/submissions",
+    "http://127.0.0.1:18788/api/submissions",
+    "http://127.0.0.1:18788/api/progress",
+    "http://127.0.0.1:18788/api/leaderboard",
+    "http://127.0.0.1:18788/api/progress",
+    "http://127.0.0.1:18788/api/submissions",
+    "http://127.0.0.1:18788/api/leaderboard",
+    "http://127.0.0.1:18788/api/account/logout",
+    "http://127.0.0.1:18788/api/session",
+    "http://127.0.0.1:18788/api/account/login",
+    "http://127.0.0.1:18788/api/session"
+  ],
+  "externalCustomHostnameRequests": [],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "failedResponses": []
+}

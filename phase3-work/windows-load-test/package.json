@@ -1,0 +1,14 @@
+{
+  "name": "itk-bgsv-staging-load-runner",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.7.0"
+  },
+  "scripts": {
+    "load": "node public-load-staging.mjs"
+  },
+  "dependencies": {
+    "ws": "8.22.2"
+  }
+}

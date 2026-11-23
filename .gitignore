@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 dist/
 data/
 .env
@@ -6,3 +6,5 @@ data/
 !.env.example
 reports/
 *.sqlite*
+__pycache__/
+*.py[cod]

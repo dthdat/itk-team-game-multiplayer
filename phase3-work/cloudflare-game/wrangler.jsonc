@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "game",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./public",
+    "not_found_handling": "404-page",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*",
+      "/ws"
+    ]
+  },
+  "send_metrics": false,
+  "account_id": "b4b9f742f28e64118e517db91a9e8414",
+  "main": "./src/worker.js",
+  "preview_urls": false,
+  "vars": { "ENVIRONMENT": "production" },
+  "env": {
+    "staging": {
+      "name": "game-staging",
+      "workers_dev": true,
+      "assets": {
+        "directory": "./public",
+        "not_found_handling": "404-page",
+        "binding": "ASSETS",
+        "run_worker_first": ["/api/*", "/ws"]
+      },
+      "vars": {
+        "ENVIRONMENT": "staging"
+      }
+    }
+  }
+}

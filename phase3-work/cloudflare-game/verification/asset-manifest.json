@@ -1,0 +1,27 @@
+[
+  {
+    "path": "game-config.js",
+    "bytes": 101,
+    "sha256": "ddef10b0d7b8e75d4cbe9a1901d70d970e3fc93b6cf590ed02f81ef32c1b22f1"
+  },
+  {
+    "path": "index.html",
+    "bytes": 189607,
+    "sha256": "18270a8a8a949e4f537dc81325fac976f85890f9bfbd088b0bac54e59e91b732"
+  },
+  {
+    "path": "phase3-ui.js",
+    "bytes": 10959,
+    "sha256": "83a62ba40a53c60d4a53da84fdfeef097ac3e2f40722d5c2c1ea6ab688483ab4"
+  },
+  {
+    "path": "vendor/three.LICENSE.txt",
+    "bytes": 1081,
+    "sha256": "7dddf7c5b8fd10ee654db8857d75d104b5557889aa5a91fc4ca545ea7c07062f"
+  },
+  {
+    "path": "vendor/three.min.js",
+    "bytes": 603445,
+    "sha256": "9274bbcec8d96168626c732b5d31c775aa8cfb7eaa0599bec0c175908a2c1ce2"
+  }
+]

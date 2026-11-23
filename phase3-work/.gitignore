@@ -1,0 +1,10 @@
+node_modules
+dist/
+data/
+.env
+.env.*
+!.env.example
+reports/
+*.sqlite*
+__pycache__/
+*.py[cod]

@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-10T15:56:14.795Z",
+  "target": "https://game-staging.itkvn.workers.dev",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "dpr": 3
+  },
+  "serviceEnabled": true,
+  "lowPowerGraphics": true,
+  "ratio": 1.25,
+  "antialias": false,
+  "revision": "128",
+  "meshCount": 464,
+  "renderCalls": 27,
+  "missionCount": 8,
+  "pageErrors": [],
+  "consoleErrors": [],
+  "guestCleanupStatus": 204,
+  "workerVersion": "fcfe1322-6264-4991-bba4-858752b2e269"
+}
